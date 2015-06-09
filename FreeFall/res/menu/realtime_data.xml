@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_save"
+        android:title="@string/text.menu.save">
+    </item>
+    <item
+        android:id="@+id/menu_clear"
+        android:title="@string/text.menu.clear">
+    </item>
+
+    <group android:id="@+id/group1" android:checkableBehavior="all">
+        <item
+            android:id="@+id/menu_toggle_x"
+            android:checkable="true"
+            android:title="@string/text.menu.grid.x">
+        </item>
+        <item
+            android:id="@+id/menu_toggle_y"
+            android:checkable="true"
+            android:title="@string/text.menu.grid.y">
+        </item>
+    </group>
+
+</menu>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="GRAPH_DRAW_X_GRID">graph.draw.marker.x</string>
+	<string name="GRAPH_DRAW_Y_GRID">graph.draw.marker.y</string>
+	<string name="PREFERENCE_FILE_KEY">net.icewindow.freefall.preferences</string>
+	<string name="SELECTED_BLUETOOTH_ADDRESS">net.icewindow.freefall.deviceAddress</string>
+	<string name="INTENT_BLUETOOTH_PICKER">net.icewindow.freefall.intent.action.SELECT_BLUETOOTH</string>
+    
+</resources>

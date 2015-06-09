@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref.bluetooth.title" >
+        <Preference
+            android:summary="@string/pref.bluetooth.host.hint"
+            android:title="@string/pref.bluetooth.host" >
+            <intent android:action="@string/INTENT_BLUETOOTH_PICKER" />
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref.graph.title" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/GRAPH_DRAW_X_GRID"
+            android:summary="@string/pref.graph.gridX"
+            android:title="@string/text.menu.grid.x" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/GRAPH_DRAW_Y_GRID"
+            android:summary="@string/pref.graph.gridY"
+            android:title="@string/text.menu.grid.y" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
