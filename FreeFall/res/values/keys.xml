@@ -5,5 +5,6 @@
 	<string name="PREFERENCE_FILE_KEY">net.icewindow.freefall.preferences</string>
 	<string name="SELECTED_BLUETOOTH_ADDRESS">net.icewindow.freefall.deviceAddress</string>
 	<string name="INTENT_BLUETOOTH_PICKER">net.icewindow.freefall.intent.action.SELECT_BLUETOOTH</string>
+	<string name="DISPLAY_NOTIFICATION">notification.ongoing.show</string>
     
 </resources>

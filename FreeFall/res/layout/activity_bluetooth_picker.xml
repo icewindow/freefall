@@ -3,6 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <ListView
+        android:id="@+id/bluetoothDeviceListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/button.discovery.start" >
+    </ListView>
+
     <Button
         android:id="@+id/button.discovery.start"
         android:layout_width="wrap_content"
@@ -12,11 +20,10 @@
         android:layout_alignParentRight="true"
         android:text="@string/button.discovery.start" />
 
-    <ListView
-        android:id="@+id/bluetoothDeviceListView"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/bluetoothDeviceMessageView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/button.discovery.start" >
-    </ListView>
+        android:layout_centerInParent="true" />
 
 </RelativeLayout>

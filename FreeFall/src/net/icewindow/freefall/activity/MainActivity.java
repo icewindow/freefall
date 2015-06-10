@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
 
 		if (preferences.getString(getString(R.string.SELECTED_BLUETOOTH_ADDRESS), "").equals("")) {
 			Intent intent = new Intent(this, BluetoothPickerActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK + Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			startActivity(intent);
 		}
 

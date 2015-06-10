@@ -20,5 +20,12 @@
             android:summary="@string/pref.graph.gridY"
             android:title="@string/text.menu.grid.y" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref.notification.title" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/DISPLAY_NOTIFICATION"
+            android:summary="@string/pref.notification.show.ongoing.hint"
+            android:title="@string/pref.notification.show.ongoing" />
+    </PreferenceCategory>
 
 </PreferenceScreen>
