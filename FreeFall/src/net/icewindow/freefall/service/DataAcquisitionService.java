@@ -41,7 +41,7 @@ public class DataAcquisitionService extends Service {
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
-
+	
 	@Override
 	public void onCreate() {
 		backgroundThread = new HandlerThread("FreefallBackgroundService", Process.THREAD_PRIORITY_BACKGROUND);
