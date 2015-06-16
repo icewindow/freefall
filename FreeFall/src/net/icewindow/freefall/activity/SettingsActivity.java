@@ -25,7 +25,7 @@ public class SettingsActivity extends Activity {
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if (key.equals(getString(R.string.DISPLAY_NOTIFICATION))) {
 				Intent intent = new Intent(DataAcquisitionService.ACTION_INTENT);
-				intent.putExtra(DataAcquisitionService.ACTION_DESCRIPTOR,
+				intent.putExtra(DataAcquisitionService.EXTRA_ACTION_DESCRIPTOR,
 						DataAcquisitionService.MSG_DISPLAY_NOTIFICATION);
 				intent.putExtra(DataAcquisitionService.EXTRA_DISPLA_NTIFICATION,
 						sharedPreferences.getBoolean(key, true));

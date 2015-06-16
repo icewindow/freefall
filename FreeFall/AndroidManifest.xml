@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name=""/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -50,15 +50,22 @@
             android:label="@string/title_activity_bluetooth_picker" >
             <intent-filter>
                 <action android:name="net.icewindow.freefall.intent.action.SELECT_BLUETOOTH" />
-                <category android:name="android.intent.category.DEFAULT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <service android:name=".service.DataAcquisitionService">
+
+        <service android:name=".service.DataAcquisitionService" >
             <intent-filter>
-                <action android:name="net.icewindow.freefall.intent.action.DATA_SERVICE"/>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="net.icewindow.freefall.intent.action.DATA_SERVICE" />
             </intent-filter>
         </service>
+
+        <receiver android:name=".receiver.BootCompleteReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

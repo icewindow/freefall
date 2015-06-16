@@ -1,9 +1,10 @@
-package net.icewindow.freefall.bluetooth;
+package net.icewindow.freefall.service.bluetooth;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.icewindow.freefall.service.DataAcquisitionService;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
@@ -13,7 +14,6 @@ import android.util.Log;
 /**
  * A device connected to the host device
  * 
- * @deprecated
  * @author icewindow
  * 
  */
@@ -30,7 +30,6 @@ public class ConnectedDevice extends Thread {
 	private final OutputStream out;
 
 	private boolean running = false;
-	private boolean parked = false;
 
 	/**
 	 * Creates a new ConnectedDevice, which is connected to the socket specified.
@@ -59,10 +58,6 @@ public class ConnectedDevice extends Thread {
 	@Override
 	public void run() {
 		Log.d(TAG, "ConnectedDevice.run() invoked");
-		if (running) {
-			Log.e(TAG, "Thread is already running");
-			return;
-		}
 		byte[] buffer = new byte[512];
 		int read;
 		running = true;
@@ -82,16 +77,13 @@ public class ConnectedDevice extends Thread {
 			} catch (IOException e) {
 				break;
 			}
-			Message message = new Message();
-			message.what = BluetoothManager.BT_MESSAGE;
+			Message message = handler.obtainMessage(DataAcquisitionService.MSG_BLUETOOTH_MESSAGE);
 			message.obj = builder.toString();
 			handler.sendMessage(message);
 		}
 		Log.d(TAG, "Connection closed");
-		Message msg = new Message();
-		msg.what = BluetoothManager.BT_CLIENT_CONNECT_CHANGE;
-		msg.arg1 = BluetoothManager.BT_CLIENT_DISCONNECT;
-		msg.obj = socket;
+		Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SENSOR_CONNECT_CHANGED);
+		msg.arg1 = DataAcquisitionService.ARG_BT_DISCONNECT;
 		handler.sendMessage(msg);
 		running = false;
 	}
@@ -125,24 +117,6 @@ public class ConnectedDevice extends Thread {
 		}
 	}
 
-	/**
-	 * Park this connection<br/>
-	 * Not yet implemented
-	 */
-	public void park() {
-		// TODO park a device
-		// Might not get implemented
-	}
-
-	/**
-	 * Unpark this connection<br/>
-	 * Not yet implemented
-	 */
-	public void unpark() {
-		// TODO unpark a device
-		// Might not get implemented
-	}
-
 	// Getters/Setters
 
 	/**
@@ -155,15 +129,6 @@ public class ConnectedDevice extends Thread {
 			return null;
 		}
 		return socket.getRemoteDevice();
-	}
-
-	/**
-	 * Check whether or not this connection is parked
-	 * 
-	 * @return <code>true</code> if this connection is parked, <code>false</code> otherwise
-	 */
-	public boolean isParked() {
-		return parked;
 	}
 
 	/**

@@ -15,6 +15,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+/**
+ * @deprecated
+ * @author icewindow
+ *
+ */
 public class BluetoothManager {
 
 	/**
