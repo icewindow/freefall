@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name=""/>
 
     <application
         android:allowBackup="true"
@@ -55,6 +56,7 @@
         <service android:name=".service.DataAcquisitionService">
             <intent-filter>
                 <action android:name="net.icewindow.freefall.intent.action.DATA_SERVICE"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </service>
     </application>

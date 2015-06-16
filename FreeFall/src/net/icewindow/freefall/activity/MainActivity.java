@@ -1,6 +1,7 @@
 package net.icewindow.freefall.activity;
 
 import net.icewindow.freefall.R;
+import net.icewindow.freefall.service.DataAcquisitionService;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,6 +24,11 @@ public class MainActivity extends Activity {
 			Intent intent = new Intent(this, BluetoothPickerActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK + Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			startActivity(intent);
+		}
+		
+		{
+			Intent intent = new Intent(DataAcquisitionService.ACTION_INTENT);
+			startService(intent);
 		}
 
 		{
