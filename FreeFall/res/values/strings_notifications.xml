@@ -5,5 +5,6 @@
     <string name="notification.service.ready">Waiting for sensor to connect</string>
     <string name="notification.service.running">Sensor connected</string>
     <string name="notification.service.ticker">FreeFall active</string>
+    <string name="notification.service.server.stopped">Server not running. Try enabling bluetooth?</string>
 
 </resources>

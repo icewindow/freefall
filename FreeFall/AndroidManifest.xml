@@ -53,6 +53,24 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+        </activity><activity android:name=".activity.FilePickerBootstrapActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.json" android:scheme="file" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:host="*" android:mimeType="application/json" android:scheme="content" />
+                <data android:scheme="file" />
+            </intent-filter>
         </activity>
 
         <service android:name=".service.DataAcquisitionService" >
@@ -66,6 +84,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        
     </application>
 
 </manifest>

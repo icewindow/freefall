@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
 			btn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Intent intent = new Intent("net.icewindow.freefall.intent.action.DATA_SERVICE");
+					Intent intent = new Intent(DataAcquisitionService.ACTION_INTENT);
 					stopService(intent);
 				}
 			});

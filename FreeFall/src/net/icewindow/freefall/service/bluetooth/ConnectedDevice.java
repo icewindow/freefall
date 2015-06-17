@@ -76,6 +76,7 @@ public class ConnectedDevice extends Thread {
 				message.obj = line;
 				handler.sendMessage(message);
 			} catch (NoSuchElementException e) {
+				break;
 			}
 		}
 		{
@@ -107,9 +108,9 @@ public class ConnectedDevice extends Thread {
 	 * Closes the socket, disconnecting this device from the remote device
 	 */
 	public void disconnect() {
+		running = false;
 		try {
 			socket.close();
-			running = false;
 		} catch (IOException e) {
 			Log.e(TAG, "Error closing socket!", e);
 		}

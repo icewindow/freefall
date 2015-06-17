@@ -24,6 +24,7 @@ import android.os.Process;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 import android.widget.Toast;
 
 public class DataAcquisitionService extends Service {
@@ -56,6 +57,10 @@ public class DataAcquisitionService extends Service {
 	 */
 	public static final int MSG_BLUETOOTH_MESSAGE = 3;
 	/**
+	 * Messgae WHAT for server state change
+	 */
+	public static final int MSG_SERVER_STATE_CHANGE = 4;
+	/**
 	 * Make a Toast
 	 */
 	public static final int MSG_TOAST = 100;
@@ -66,6 +71,9 @@ public class DataAcquisitionService extends Service {
 
 	public static final int ARG_BT_CONNECT = 1;
 	public static final int ARG_BT_DISCONNECT = 0;
+
+	public static final int ARG_SERVER_STARTED = 1;
+	public static final int ARG_SERVER_STOPPED = 0;
 
 	private final class ServiceHandler extends Handler {
 		public ServiceHandler(Looper looper) {
@@ -96,6 +104,17 @@ public class DataAcquisitionService extends Service {
 				case MSG_BLUETOOTH_MESSAGE:
 					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
 					break;
+				case MSG_SERVER_STATE_CHANGE:
+					switch (msg.arg1) {
+						case ARG_SERVER_STARTED:
+							notificationBuilder.setContentText(getString(R.string.notification_service_ready));
+							break;
+						case ARG_SERVER_STOPPED:
+							notificationBuilder.setContentText(getString(R.string.notification_service_server_stopped));
+							break;
+					}
+					postNotification();
+					break;
 				case MSG_TOAST:
 					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
 					break;
@@ -122,6 +141,8 @@ public class DataAcquisitionService extends Service {
 					server.shutdown();
 					break;
 				case BluetoothAdapter.STATE_ON:
+					server = new BluetoothServer(adapter, serviceHandler);
+					server.startup();
 					server.start();
 			}
 		}
@@ -132,11 +153,15 @@ public class DataAcquisitionService extends Service {
 	private int notificationID = 0x1CEC0DE;
 	private HandlerThread backgroundThread;
 	private ServiceHandler serviceHandler;
+	private BluetoothAdapter adapter;
 	private BluetoothServer server;
+	private boolean isAlive;
 
 	private SharedPreferences preferences;
 
 	private RealtimeGraphModel model;
+
+	private static final String TAG = "DataAcquisitionService";
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -150,19 +175,14 @@ public class DataAcquisitionService extends Service {
 
 	@Override
 	public void onCreate() {
+		Log.d(TAG, "Service created");
+		isAlive = true;
+
 		backgroundThread = new HandlerThread("FreefallBackgroundService", Process.THREAD_PRIORITY_BACKGROUND);
 		backgroundThread.start();
 
 		Looper serviceLooper = backgroundThread.getLooper();
 		serviceHandler = new ServiceHandler(serviceLooper);
-
-		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-		if (adapter != null) {
-			server = new BluetoothServer(adapter, serviceHandler);
-			if (adapter.isEnabled()) {
-				server.start();
-			}
-		}
 
 		IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
 		registerReceiver(bluetoothStateChangeReceiver, filter);
@@ -177,11 +197,21 @@ public class DataAcquisitionService extends Service {
 		stackBuilder.addNextIntent(intent);
 		PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 		notificationBuilder.setSmallIcon(R.drawable.ic_freefall_service)
-				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-				.setContentTitle(getString(R.string.notification_service_title)).setOngoing(true)
-				.setContentText(getString(R.string.notification_service_ready)).setContentIntent(pendingIntent)
-				.setTicker(getString(R.string.notification_service_ticker));
-		postNotification();
+				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setOngoing(true)
+				.setContentIntent(pendingIntent).setTicker(getString(R.string.notification_service_ticker))
+				.setContentTitle(getString(R.string.notification_service_title));
+		// .setContentText(getString(R.string.notification_service_server_stopped))
+		// .setContentText("Ponyponypony");
+		// postNotification();
+
+		adapter = BluetoothAdapter.getDefaultAdapter();
+		if (adapter != null) {
+			server = new BluetoothServer(adapter, serviceHandler);
+			if (adapter.isEnabled()) {
+				server.startup();
+				server.start();
+			}
+		}
 
 	}
 
@@ -207,12 +237,15 @@ public class DataAcquisitionService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		notificationManager.cancel(notificationID);
+		isAlive = false;
 		unregisterReceiver(bluetoothStateChangeReceiver);
+		server.shutdown();
+		notificationManager.cancel(notificationID);
+		Log.d(TAG, "Service destroyed");
 	}
 
 	private void postNotification() {
-		if (preferences.getBoolean(getString(R.string.DISPLAY_NOTIFICATION), true)) {
+		if (preferences.getBoolean(getString(R.string.DISPLAY_NOTIFICATION), true) && isAlive) {
 			notificationManager.notify(notificationID, notificationBuilder.build());
 		}
 	}
