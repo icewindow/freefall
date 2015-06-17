@@ -133,18 +133,19 @@ public class BluetoothPickerActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
+		// Check if we have a bluetooth adapter
 		if (bluetoothAdapter != null) {
 			buildList();
+
+			// Ask the user to enable bluetooth, if it isn't enabled
+			if (!bluetoothAdapter.isEnabled() && !userAsked) {
+				userAsked = true;
+				Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				startActivityForResult(enableBluetoothIntent, REQUEST_BT_ENABLE);
+			}
 		} else {
 			((TextView) findViewById(R.id.bluetoothDeviceMessageView)).setText(R.string.text_bluetooth_noAdapter);
-		}
-
-		// Ask the user to enable bluetooth, if it isn't enabled
-		if (!bluetoothAdapter.isEnabled() && !userAsked) {
-			userAsked = true;
-			Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableBluetoothIntent, REQUEST_BT_ENABLE);
 		}
 	}
 
@@ -167,6 +168,12 @@ public class BluetoothPickerActivity extends Activity {
 						Toast.makeText(this, "I dunno lol ¯\\°.o/¯", Toast.LENGTH_SHORT).show();
 				}
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unregisterReceiver(discoveryReceiver);
 	}
 
 	private void buildList() {

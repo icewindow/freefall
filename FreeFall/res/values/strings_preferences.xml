@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="pref.bluetooth.host">Bluetooth host</string>
+    <string name="pref.bluetooth.host.hint">Bluetooth host to connect to</string>
+    <string name="pref.bluetooth.title">Bluetooth settings</string>
+    <string name="pref.notification.title">Notifications</string>
+    <string name="pref.notification.show.ongoing">Show notification</string>
+    <string name="pref.notification.show.ongoing.hint">Display icon in the notification bar if active.</string>
+    <string name="pref.graph.title">Graph view</string>
+    <string name="pref.graph.gridX">Should the gridmarks in X direction be drawn?</string>
+    <string name="pref.graph.gridY">Should the gridmarks in Y direction be drawn?</string>
+    <string name="pref.mail.title">Email settings</string>
+    <string name="pref.mail.title.hint">Configure email notifications</string>
+    <string name="pref.mail.address.from">Sender address</string>
+    <string name="pref.mail.address.from.hint">From which email address to send the messages</string>
+    <string name="pref.mail.address.to">Recipient address</string>
+    <string name="pref.mail.address.to.hint">To whom to send the mails</string>
+    <string name="pref.mail.login.title">Login data</string>
+    <string name="pref.mail.login.senderIsUser">Sender address is username</string><string name="pref.mail.login.senderIsUser.hint">Uncheck if outbox username and sender address are different</string><string name="pref.mail.login.user">Sender username</string>
+    <string name="pref.mail.login.pass">Password</string>
+    <string name="pref.mail.placeholder">john.doe@example.com</string>
+    
+    
+
+</resources>

@@ -7,10 +7,14 @@ import net.icewindow.freefall.service.bluetooth.BluetoothServer;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -37,12 +41,7 @@ public class DataAcquisitionService extends Service {
 	/**
 	 * Extra for notification visibility
 	 */
-	public static final String EXTRA_DISPLA_NTIFICATION = "net.icewindow.freefall.extra.DISPLAY_NOTIFICATION";
-
-	/**
-	 * Extra for sensor module connection state changed
-	 */
-	public static final String EXTRA_SENSOR_CONNECT_CHANGED = "net-icewindow.freefall.extra.SENSOR_CONNECT_CHANGED";
+	public static final String EXTRA_DISPLA_NOTIFICATION = "net.icewindow.freefall.extra.DISPLAY_NOTIFICATION";
 
 	/**
 	 * Message WHAT for notification visibility change
@@ -53,9 +52,13 @@ public class DataAcquisitionService extends Service {
 	 */
 	public static final int MSG_SENSOR_CONNECT_CHANGED = 2;
 	/**
-	 * 
+	 * Message WHAT for bluetooth messages
 	 */
 	public static final int MSG_BLUETOOTH_MESSAGE = 3;
+	/**
+	 * Make a Toast
+	 */
+	public static final int MSG_TOAST = 100;
 	/**
 	 * Message WHAT to terminate the service gracefully (unused as of yet)
 	 */
@@ -63,6 +66,66 @@ public class DataAcquisitionService extends Service {
 
 	public static final int ARG_BT_CONNECT = 1;
 	public static final int ARG_BT_DISCONNECT = 0;
+
+	private final class ServiceHandler extends Handler {
+		public ServiceHandler(Looper looper) {
+			super(looper);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case MSG_DISPLAY_NOTIFICATION:
+					if (msg.arg1 == 0) {
+						notificationManager.cancel(notificationID);
+					} else {
+						postNotification();
+					}
+					break;
+				case MSG_SENSOR_CONNECT_CHANGED:
+					switch (msg.arg1) {
+						case ARG_BT_DISCONNECT:
+							notificationBuilder.setContentText(getString(R.string.notification_service_ready));
+							break;
+						case ARG_BT_CONNECT:
+							notificationBuilder.setContentText(getString(R.string.notification_service_running));
+							break;
+					}
+					postNotification();
+					break;
+				case MSG_BLUETOOTH_MESSAGE:
+					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
+					break;
+				case MSG_TOAST:
+					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Binder implementation
+	 * 
+	 * @author icewindow
+	 */
+	private class ServiceBinder extends Binder {
+
+	}
+
+	private final IBinder serviceBinder = new ServiceBinder();
+
+	private final BroadcastReceiver bluetoothStateChangeReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			switch (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)) {
+				case BluetoothAdapter.STATE_TURNING_OFF:
+					server.shutdown();
+					break;
+				case BluetoothAdapter.STATE_ON:
+					server.start();
+			}
+		}
+	};
 
 	private NotificationCompat.Builder notificationBuilder;
 	private NotificationManager notificationManager;
@@ -75,42 +138,14 @@ public class DataAcquisitionService extends Service {
 
 	private RealtimeGraphModel model;
 
-	private final class ServiceHandler extends Handler {
-		public ServiceHandler(Looper looper) {
-			super(looper);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case MSG_DISPLAY_NOTIFICATION:
-				if (msg.arg1 == 0) {
-					notificationManager.cancel(notificationID);
-				} else {
-					postNotification();
-				}
-				break;
-			case MSG_SENSOR_CONNECT_CHANGED:
-				switch (msg.arg1) {
-				case ARG_BT_DISCONNECT:
-					notificationBuilder.setContentText(getString(R.string.notification_service_ready));
-					break;
-				case ARG_BT_CONNECT:
-					notificationBuilder.setContentText(getString(R.string.notification_service_running));
-					break;
-				}
-				postNotification();
-				break;
-			case MSG_BLUETOOTH_MESSAGE:
-				Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
-				break;
-			}
-		}
+	@Override
+	public IBinder onBind(Intent intent) {
+		return serviceBinder;
 	}
 
 	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
+	public boolean onUnbind(Intent intent) {
+		return super.onUnbind(intent);
 	}
 
 	@Override
@@ -121,8 +156,16 @@ public class DataAcquisitionService extends Service {
 		Looper serviceLooper = backgroundThread.getLooper();
 		serviceHandler = new ServiceHandler(serviceLooper);
 
-		server = new BluetoothServer(serviceHandler);
-		server.start();
+		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+		if (adapter != null) {
+			server = new BluetoothServer(adapter, serviceHandler);
+			if (adapter.isEnabled()) {
+				server.start();
+			}
+		}
+
+		IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+		registerReceiver(bluetoothStateChangeReceiver, filter);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -144,20 +187,18 @@ public class DataAcquisitionService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		int action = intent.getIntExtra(EXTRA_ACTION_DESCRIPTOR, 0);
-		if (action > 0) {
-			Message msg = serviceHandler.obtainMessage();
-			switch (action) {
-			case MSG_DISPLAY_NOTIFICATION:
-				msg.what = MSG_DISPLAY_NOTIFICATION;
-				msg.arg1 = intent.getExtras().getBoolean(EXTRA_DISPLA_NTIFICATION) ? 1 : 0;
-				break;
-			case MSG_SENSOR_CONNECT_CHANGED:
-				msg.what = MSG_SENSOR_CONNECT_CHANGED;
-				msg.arg1 = intent.getExtras().getBoolean(EXTRA_SENSOR_CONNECT_CHANGED) ? 1 : 0;
-				break;
+		if (intent != null) {
+			int action = intent.getIntExtra(EXTRA_ACTION_DESCRIPTOR, 0);
+			if (action > 0) {
+				Message msg = serviceHandler.obtainMessage();
+				switch (action) {
+					case MSG_DISPLAY_NOTIFICATION:
+						msg.what = MSG_DISPLAY_NOTIFICATION;
+						msg.arg1 = intent.getExtras().getBoolean(EXTRA_DISPLA_NOTIFICATION) ? 1 : 0;
+						break;
+				}
+				serviceHandler.sendMessage(msg);
 			}
-			serviceHandler.sendMessage(msg);
 		}
 
 		return START_STICKY;
@@ -167,6 +208,7 @@ public class DataAcquisitionService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		notificationManager.cancel(notificationID);
+		unregisterReceiver(bluetoothStateChangeReceiver);
 	}
 
 	private void postNotification() {

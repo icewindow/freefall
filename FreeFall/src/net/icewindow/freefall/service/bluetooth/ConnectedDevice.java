@@ -3,6 +3,8 @@ package net.icewindow.freefall.service.bluetooth;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 import net.icewindow.freefall.service.DataAcquisitionService;
 import android.bluetooth.BluetoothDevice;
@@ -57,34 +59,31 @@ public class ConnectedDevice extends Thread {
 
 	@Override
 	public void run() {
-		Log.d(TAG, "ConnectedDevice.run() invoked");
-		byte[] buffer = new byte[512];
-		int read;
 		running = true;
+		Scanner scanner = new Scanner(in);
 
 		Log.d(TAG, "Listening for incoming data...");
+		{
+			Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SENSOR_CONNECT_CHANGED);
+			msg.arg1 = DataAcquisitionService.ARG_BT_CONNECT;
+			handler.sendMessage(msg);
+		}
 		while (running) {
-			StringBuilder builder = new StringBuilder();
 			try {
-				outer: while ((read = in.read(buffer)) > 0) {
-					for (int i = 0; i < read; i++) {
-						if (buffer[i] == (byte) 0x0A) {
-							break outer;
-						}
-						builder.append((char) buffer[i]);
-					}
-				}
-			} catch (IOException e) {
-				break;
+				String line = scanner.nextLine();
+				Message message = handler.obtainMessage(DataAcquisitionService.MSG_BLUETOOTH_MESSAGE);
+				// message.obj = builder.toString();
+				message.obj = line;
+				handler.sendMessage(message);
+			} catch (NoSuchElementException e) {
 			}
-			Message message = handler.obtainMessage(DataAcquisitionService.MSG_BLUETOOTH_MESSAGE);
-			message.obj = builder.toString();
-			handler.sendMessage(message);
+		}
+		{
+			Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SENSOR_CONNECT_CHANGED);
+			msg.arg1 = DataAcquisitionService.ARG_BT_DISCONNECT;
+			handler.sendMessage(msg);
 		}
 		Log.d(TAG, "Connection closed");
-		Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SENSOR_CONNECT_CHANGED);
-		msg.arg1 = DataAcquisitionService.ARG_BT_DISCONNECT;
-		handler.sendMessage(msg);
 		running = false;
 	}
 
@@ -99,7 +98,6 @@ public class ConnectedDevice extends Thread {
 		Log.d(TAG, "Writing " + buffer.length + " bytes to " + socket.getRemoteDevice().getName());
 		try {
 			out.write(buffer);
-			// out.write(new byte[] { (byte) 0x00, (byte) 0xFF });
 		} catch (IOException e) {
 			Log.e(TAG, "Error writing to output stream!", e);
 		}

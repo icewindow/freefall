@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="text.connecting">Connecting&#8230;</string>
+    <string name="text.connecting.failed">No device selected!\nPlease select a device first!</string>
+    <string name="text.connecting.connected">Connected to %1$s</string>
+    <string name="text.connecting.disconnected">Disconnected from %1$s</string>
+    <string name="text.discovery.devicecount">%1$d device(s) found</string>
+    <string name="text.bluetooth.noAdapter">No Bluetooth adapter present!</string>
+    <string name="text.bluetooth.enableBT">Please enable bluetooth!</string>
+    <string name="text.bluetooth.selectedDevice">Selected %1$s\n(Address is %2$s)</string>
+    <string name="text.menu.save">Save to file</string>
+    <string name="text.saving">Saving data. This might take a while ;)</string>
+    <string name="text.saved">Saved data to %1$s</string>
+    <string name="text.saving.error">Error writing to file! (See LogCat)</string>
+    <string name="text.menu.clear">Clear data</string>
+    <string name="text.menu.grid.x">Show X gridmarks</string>
+    <string name="text.menu.grid.y">Show Y gridmarks</string>
+
+</resources>

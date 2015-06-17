@@ -27,7 +27,7 @@ public class SettingsActivity extends Activity {
 				Intent intent = new Intent(DataAcquisitionService.ACTION_INTENT);
 				intent.putExtra(DataAcquisitionService.EXTRA_ACTION_DESCRIPTOR,
 						DataAcquisitionService.MSG_DISPLAY_NOTIFICATION);
-				intent.putExtra(DataAcquisitionService.EXTRA_DISPLA_NTIFICATION,
+				intent.putExtra(DataAcquisitionService.EXTRA_DISPLA_NOTIFICATION,
 						sharedPreferences.getBoolean(key, true));
 				startService(intent);
 			}
