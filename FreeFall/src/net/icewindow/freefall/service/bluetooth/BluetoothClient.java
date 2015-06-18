@@ -45,7 +45,9 @@ public class BluetoothClient implements IBluetoothConnection {
 
 	@Override
 	public void write(String data) {
-		server.write(data);
+		if (server != null) {
+			server.write(data);
+		}
 	}
 
 }

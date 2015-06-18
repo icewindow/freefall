@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <EditTextPreference
+        android:defaultValue="@string/pref.mail.placeholder"
+        android:key="@string/MAIL_ADDRESS_FROM"
+        android:summary="@string/pref.mail.address.from.hint"
+        android:title="@string/pref.mail.address.from" />
+    <EditTextPreference
+        android:defaultValue="@string/pref.mail.placeholder"
+        android:key="@string/MAIL_ADDRESS_TO"
+        android:summary="@string/pref.mail.address.to.hint"
+        android:title="@string/pref.mail.address.to" />
+
+    <PreferenceCategory android:title="@string/pref.mail.login.title" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:key="@string/MAIL_AUTH_SENDERISUSER"
+            android:summary="@string/pref.mail.login.senderIsUser.hint"
+            android:title="@string/pref.mail.login.senderIsUser" />
+
+        <EditTextPreference
+            android:defaultValue="@string/pref.mail.placeholder"
+            android:dependency="@string/MAIL_AUTH_SENDERISUSER"
+            android:key="@string/MAIL_AUTH_USER"
+            android:title="@string/pref.mail.login.user" />
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="@string/MAIL_AUTH_PASSWORD"
+            android:title="@string/pref.mail.login.pass" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

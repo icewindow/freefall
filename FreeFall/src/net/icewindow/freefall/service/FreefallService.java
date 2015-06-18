@@ -27,7 +27,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.Toast;
 
-public class DataAcquisitionService extends Service {
+public class FreefallService extends Service {
 
 	/**
 	 * Extra name for action descriptor integer
@@ -102,6 +102,7 @@ public class DataAcquisitionService extends Service {
 					postNotification();
 					break;
 				case MSG_BLUETOOTH_MESSAGE:
+					//TODO implement message handling
 					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
 					break;
 				case MSG_SERVER_STATE_CHANGE:
@@ -127,8 +128,13 @@ public class DataAcquisitionService extends Service {
 	 * 
 	 * @author icewindow
 	 */
-	private class ServiceBinder extends Binder {
-
+	public class ServiceBinder extends Binder {
+		public static final int STATE_OFFLINE = 0;
+		public static final int STATE_ONLINE = 1;
+		public static final int STATE_CONNECTED = 2;
+		public int getServerStatus() {
+			return 0;
+		}
 	}
 
 	private final IBinder serviceBinder = new ServiceBinder();

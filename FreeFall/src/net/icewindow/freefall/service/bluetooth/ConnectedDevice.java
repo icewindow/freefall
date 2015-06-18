@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import net.icewindow.freefall.service.DataAcquisitionService;
+import net.icewindow.freefall.service.FreefallService;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
@@ -64,14 +64,14 @@ public class ConnectedDevice extends Thread {
 
 		Log.d(TAG, "Listening for incoming data...");
 		{
-			Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SENSOR_CONNECT_CHANGED);
-			msg.arg1 = DataAcquisitionService.ARG_BT_CONNECT;
+			Message msg = handler.obtainMessage(FreefallService.MSG_SENSOR_CONNECT_CHANGED);
+			msg.arg1 = FreefallService.ARG_BT_CONNECT;
 			handler.sendMessage(msg);
 		}
 		while (running) {
 			try {
 				String line = scanner.nextLine();
-				Message message = handler.obtainMessage(DataAcquisitionService.MSG_BLUETOOTH_MESSAGE);
+				Message message = handler.obtainMessage(FreefallService.MSG_BLUETOOTH_MESSAGE);
 				// message.obj = builder.toString();
 				message.obj = line;
 				handler.sendMessage(message);
@@ -80,8 +80,8 @@ public class ConnectedDevice extends Thread {
 			}
 		}
 		{
-			Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SENSOR_CONNECT_CHANGED);
-			msg.arg1 = DataAcquisitionService.ARG_BT_DISCONNECT;
+			Message msg = handler.obtainMessage(FreefallService.MSG_SENSOR_CONNECT_CHANGED);
+			msg.arg1 = FreefallService.ARG_BT_DISCONNECT;
 			handler.sendMessage(msg);
 		}
 		Log.d(TAG, "Connection closed");

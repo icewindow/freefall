@@ -3,7 +3,7 @@ package net.icewindow.freefall.service.bluetooth;
 import java.io.IOException;
 import java.util.UUID;
 
-import net.icewindow.freefall.service.DataAcquisitionService;
+import net.icewindow.freefall.service.FreefallService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
@@ -34,8 +34,8 @@ public class BluetoothServer extends Thread implements IBluetoothConnection {
 		running = true;
 		BluetoothSocket clientSocket = null;
 		{
-			Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SERVER_STATE_CHANGE);
-			msg.arg1 = DataAcquisitionService.ARG_SERVER_STARTED;
+			Message msg = handler.obtainMessage(FreefallService.MSG_SERVER_STATE_CHANGE);
+			msg.arg1 = FreefallService.ARG_SERVER_STARTED;
 			handler.sendMessage(msg);
 		}
 		Log.d(TAG, "Server starting up");
@@ -56,8 +56,8 @@ public class BluetoothServer extends Thread implements IBluetoothConnection {
 		}
 		running = false;
 		{
-			Message msg = handler.obtainMessage(DataAcquisitionService.MSG_SERVER_STATE_CHANGE);
-			msg.arg1 = DataAcquisitionService.ARG_SERVER_STOPPED;
+			Message msg = handler.obtainMessage(FreefallService.MSG_SERVER_STATE_CHANGE);
+			msg.arg1 = FreefallService.ARG_SERVER_STOPPED;
 			handler.sendMessage(msg);
 		}
 		Log.d(TAG, "Server shut down");
@@ -88,7 +88,9 @@ public class BluetoothServer extends Thread implements IBluetoothConnection {
 
 	@Override
 	public void write(String data) {
-		client.write(data);
+		if (client != null) {
+			client.write(data);
+		}
 	}
 
 }

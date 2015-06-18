@@ -4,12 +4,12 @@
 	<string name="GRAPH_DRAW_Y_GRID">graph.draw.marker.y</string>
 	<string name="PREFERENCE_FILE_KEY">net.icewindow.freefall.preferences</string>
 	<string name="SELECTED_BLUETOOTH_ADDRESS">net.icewindow.freefall.deviceAddress</string>
-	<string name="INTENT_BLUETOOTH_PICKER">net.icewindow.freefall.intent.action.SELECT_BLUETOOTH</string>
 	<string name="DISPLAY_NOTIFICATION">notification.ongoing.show</string>
 	<string name="MAIL_ADDRESS_FROM">mail.address.from</string>
 	<string name="MAIL_ADDRESS_TO">mail.address.to</string>
 	<string name="MAIL_AUTH_USER">mail.auth.user</string>
 	<string name="MAIL_AUTH_PASSWORD">mail.auth.password</string>
 	<string name="MAIL_AUTH_SENDERISUSER">mail.auth.senderIsUser</string>
+	<string name="SETUP_COMPLETE">setup.complete</string>
     
 </resources>

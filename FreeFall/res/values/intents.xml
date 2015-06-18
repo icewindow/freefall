@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="INTENT_BLUETOOTH_PICKER">net.icewindow.freefall.intent.action.SELECT_BLUETOOTH</string>
+
+</resources>
