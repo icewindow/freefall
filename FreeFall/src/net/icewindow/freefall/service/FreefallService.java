@@ -61,6 +61,10 @@ public class FreefallService extends Service {
 	 */
 	public static final int MSG_SERVER_STATE_CHANGE = 4;
 	/**
+	 * Message WHAT for Bluetooth client connection ready
+	 */
+	public static final int MSG_BT_CLIENT_READY = 5;
+	/**
 	 * Make a Toast
 	 */
 	public static final int MSG_TOAST = 100;

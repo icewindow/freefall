@@ -2,9 +2,11 @@ package net.icewindow.freefall.service.bluetooth;
 
 import java.io.IOException;
 
+import net.icewindow.freefall.service.FreefallService;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.os.Message;
 
 public class BluetoothClient implements IBluetoothConnection {
 
@@ -41,6 +43,14 @@ public class BluetoothClient implements IBluetoothConnection {
 
 	protected void connectDevice(BluetoothSocket socket) {
 		server = new ConnectedDevice(socket, handler);
+		server.start();
+		Message msg = handler.obtainMessage(FreefallService.MSG_BT_CLIENT_READY);
+		msg.obj = server;
+		handler.sendMessage(msg);
+	}
+
+	public ConnectedDevice getPeer() {
+		return server;
 	}
 
 	@Override

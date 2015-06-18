@@ -3,10 +3,16 @@ package net.icewindow.freefall.activity;
 import net.icewindow.freefall.R;
 import net.icewindow.freefall.mail.Mail;
 import net.icewindow.freefall.service.FreefallService;
+import net.icewindow.freefall.service.bluetooth.BluetoothClient;
+import net.icewindow.freefall.service.bluetooth.ConnectedDevice;
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +20,18 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends Activity {
+	
+	private final static class ConnectHandler extends Handler {
+		private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+		@Override
+		public void handleMessage(Message msg) {
+			if (msg.what == FreefallService.MSG_BT_CLIENT_READY) {
+				ConnectedDevice server = (ConnectedDevice) msg.obj;
+				server.write(adapter.getAddress());
+				server.disconnect();
+			}
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +110,22 @@ public class MainActivity extends Activity {
 				}
 			});
 		}
+		{
+			Button btn = (Button) findViewById(R.id.btn_send_ping);
+			btn.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					final Handler handler = new ConnectHandler();
+					BluetoothClient client = new BluetoothClient(handler);
+					try {
+						BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
+								preferences.getString(getString(R.string.SELECTED_BLUETOOTH_ADDRESS), ""));
+						client.connectToServer(device);
+					} catch (IllegalArgumentException e) {
+					}
+				}
+			});
+		}
 	}
 
 	@Override
@@ -104,10 +138,10 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.action_settings:
-				Intent intent = new Intent(this, SettingsActivity.class);
-				startActivity(intent);
-				break;
+		case R.id.action_settings:
+			Intent intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
