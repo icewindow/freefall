@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="pref.bluetooth.host">Bluetooth host</string>
-    <string name="pref.bluetooth.host.hint">Bluetooth host to connect to</string>
-    <string name="pref.bluetooth.title">Bluetooth settings</string>
+    <string name="pref.bluetooth.title">Connection settings</string>
+    <string name="pref.bluetooth.host">Select sensor device</string>
+    <string name="pref.bluetooth.host.hint">Pick the sensor to connect to</string>
+    <string name="pref.bluetooth.active">Active connect mode</string>
+    <string name="pref.bluetooth.active.hint.checked">Sensor can automatically connect once turned on</string>
+    <string name="pref.bluetooth.active.hint.unchecked">Sensor requires user to manually connect to it</string>
     <string name="pref.notification.title">Notifications</string>
     <string name="pref.notification.show.ongoing">Show notification</string>
     <string name="pref.notification.show.ongoing.hint">Display icon in the notification bar if active.</string>

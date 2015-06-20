@@ -9,7 +9,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Intent service = new Intent(FreefallService.ACTION_INTENT);
+		Intent service = new Intent(FreefallService.INTENT_NAME);
 		context.startService(service);
 	}
 

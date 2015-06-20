@@ -69,10 +69,10 @@ public class BluetoothPickerActivity extends Activity {
 			}
 
 			Intent intent = null;
-			if (preferences.getString(getString(R.string.SELECTED_BLUETOOTH_ADDRESS), "").equals("")) {
+			if (preferences.getString(getString(R.string.SENSOR_ADDRESS), "").equals("")) {
 				intent = new Intent(BluetoothPickerActivity.this, MainActivity.class);
 			}
-			preferences.edit().putString(getString(R.string.SELECTED_BLUETOOTH_ADDRESS), address).commit();
+			preferences.edit().putString(getString(R.string.SENSOR_ADDRESS), address).commit();
 			Toast.makeText(BluetoothPickerActivity.this,
 					getString(R.string.text_bluetooth_selectedDevice, deviceName, address), Toast.LENGTH_SHORT).show();
 			BluetoothPickerActivity.this.finish();

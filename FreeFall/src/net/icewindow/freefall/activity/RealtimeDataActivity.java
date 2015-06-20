@@ -88,7 +88,7 @@ public class RealtimeDataActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					Toast.makeText(RealtimeDataActivity.this, R.string.text_connecting, Toast.LENGTH_SHORT).show();
-					String address = preferences.getString(getString(R.string.SELECTED_BLUETOOTH_ADDRESS), "");
+					String address = preferences.getString(getString(R.string.SENSOR_ADDRESS), "");
 					if (address.equals("")) {
 						Toast.makeText(RealtimeDataActivity.this, R.string.text_connecting_failed, Toast.LENGTH_SHORT)
 								.show();

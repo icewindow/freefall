@@ -92,5 +92,10 @@ public class BluetoothServer extends Thread implements IBluetoothConnection {
 			client.write(data);
 		}
 	}
+	
+	@Override
+	public ConnectedDevice getRemoteDevice() {
+		return client;
+	}
 
 }

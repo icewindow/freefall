@@ -49,5 +49,10 @@ public class BluetoothClient implements IBluetoothConnection {
 			server.write(data);
 		}
 	}
+	
+	@Override
+	public ConnectedDevice getRemoteDevice() {
+		return server;
+	}
 
 }

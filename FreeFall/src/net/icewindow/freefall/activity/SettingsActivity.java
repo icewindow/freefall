@@ -25,7 +25,7 @@ public class SettingsActivity extends Activity {
 		@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if (key.equals(getString(R.string.DISPLAY_NOTIFICATION))) {
-				Intent intent = new Intent(FreefallService.ACTION_INTENT);
+				Intent intent = new Intent(FreefallService.INTENT_NAME);
 				intent.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR,
 						FreefallService.MSG_DISPLAY_NOTIFICATION);
 				intent.putExtra(FreefallService.EXTRA_DISPLA_NOTIFICATION,

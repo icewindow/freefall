@@ -22,7 +22,7 @@ public class MainActivity extends Activity {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		{
-			Intent intent = new Intent(FreefallService.ACTION_INTENT);
+			Intent intent = new Intent(FreefallService.INTENT_NAME);
 			startService(intent);
 		}
 
@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
 		// startActivity(intent);
 		// }
 
-		if (preferences.getString(getString(R.string.SELECTED_BLUETOOTH_ADDRESS), "").equals("")) {
+		if (preferences.getString(getString(R.string.SENSOR_ADDRESS), "").equals("")) {
 			Intent intent = new Intent(this, BluetoothPickerActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK + Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			startActivity(intent);
@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
 			btn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Intent intent = new Intent(FreefallService.ACTION_INTENT);
+					Intent intent = new Intent(FreefallService.INTENT_NAME);
 					stopService(intent);
 				}
 			});

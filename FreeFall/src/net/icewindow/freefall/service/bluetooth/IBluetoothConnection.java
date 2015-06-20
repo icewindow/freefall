@@ -4,4 +4,6 @@ public interface IBluetoothConnection {
 
 	public void write(String data);
 	
+	public ConnectedDevice getRemoteDevice();
+	
 }

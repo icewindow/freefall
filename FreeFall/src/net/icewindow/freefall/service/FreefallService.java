@@ -3,7 +3,9 @@ package net.icewindow.freefall.service;
 import net.icewindow.freefall.R;
 import net.icewindow.freefall.activity.MainActivity;
 import net.icewindow.freefall.activity.model.RealtimeGraphModel;
+import net.icewindow.freefall.service.bluetooth.BluetoothClient;
 import net.icewindow.freefall.service.bluetooth.BluetoothServer;
+import net.icewindow.freefall.service.bluetooth.ConnectedDevice;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -37,12 +39,34 @@ public class FreefallService extends Service {
 	/**
 	 * Intent to start the service
 	 */
-	public static final String ACTION_INTENT = "net.icewindow.freefall.intent.action.DATA_SERVICE";
+	public static final String INTENT_NAME = "net.icewindow.freefall.intent.action.DATA_SERVICE";
 
 	/**
 	 * Extra for notification visibility
 	 */
 	public static final String EXTRA_DISPLA_NOTIFICATION = "net.icewindow.freefall.extra.DISPLAY_NOTIFICATION";
+	/**
+	 * The String data extra for {@link FreefallService#ACTION_SENSOR_WRITE}
+	 */
+	public static final String EXTRA_WRITE_DATA = "net.icewindow.freefall.extra.WRITA_DATA";
+
+	/**
+	 * Action to signify the notification should be displayed or not
+	 */
+	public static final int ACTION_CHANGE_NOTIFICATION_DISPLAY = 1;
+	/**
+	 * Action to indicate the service should try to connect to the sensor
+	 */
+	public static final int ACTION_CONNECT_SENSOR = 2;
+	/**
+	 * Action to signify the sensor type has changed (active or passive)
+	 */
+	public static final int ACTION_SENSOR_TYPE_CHANGE = 3;
+	/**
+	 * Action indicating we want to write to the remote device<br/>
+	 * Needs {@link FreefallService#EXTRA_WRITE_DATA}
+	 */
+	public static final int ACTION_SENSOR_WRITE = 4;
 
 	/**
 	 * Message WHAT for notification visibility change
@@ -93,22 +117,28 @@ public class FreefallService extends Service {
 				case MSG_SENSOR_CONNECT_CHANGED:
 					switch (msg.arg1) {
 						case ARG_BT_DISCONNECT:
-							notificationBuilder.setContentText(getString(R.string.notification_service_ready));
+							if (isSensorActive()) {
+								notificationBuilder
+										.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+							} else {
+								notificationBuilder
+										.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
+							}
 							break;
 						case ARG_BT_CONNECT:
-							notificationBuilder.setContentText(getString(R.string.notification_service_running));
+							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_connected));
 							break;
 					}
 					postNotification();
 					break;
 				case MSG_BLUETOOTH_MESSAGE:
-					//TODO implement message handling
+					// TODO implement message handling
 					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
 					break;
 				case MSG_SERVER_STATE_CHANGE:
 					switch (msg.arg1) {
 						case ARG_SERVER_STARTED:
-							notificationBuilder.setContentText(getString(R.string.notification_service_ready));
+							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_active));
 							break;
 						case ARG_SERVER_STOPPED:
 							notificationBuilder.setContentText(getString(R.string.notification_service_server_stopped));
@@ -132,6 +162,7 @@ public class FreefallService extends Service {
 		public static final int STATE_OFFLINE = 0;
 		public static final int STATE_ONLINE = 1;
 		public static final int STATE_CONNECTED = 2;
+
 		public int getServerStatus() {
 			return 0;
 		}
@@ -161,6 +192,8 @@ public class FreefallService extends Service {
 	private ServiceHandler serviceHandler;
 	private BluetoothAdapter adapter;
 	private BluetoothServer server;
+	private BluetoothClient client;
+	private ConnectedDevice sensor;
 	private boolean isAlive;
 
 	private SharedPreferences preferences;
@@ -198,7 +231,13 @@ public class FreefallService extends Service {
 		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationBuilder = new NotificationCompat.Builder(getApplicationContext());
 
-		Intent intent = new Intent(this, MainActivity.class);
+		Intent intent;
+		if (isSensorActive()) {
+			intent = new Intent(this, MainActivity.class);
+		} else {
+			intent = new Intent(INTENT_NAME);
+			intent.putExtra(EXTRA_ACTION_DESCRIPTOR, ACTION_CONNECT_SENSOR);
+		}
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 		stackBuilder.addNextIntent(intent);
 		PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -206,18 +245,16 @@ public class FreefallService extends Service {
 				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setOngoing(true)
 				.setContentIntent(pendingIntent).setTicker(getString(R.string.notification_service_ticker))
 				.setContentTitle(getString(R.string.notification_service_title));
-		// .setContentText(getString(R.string.notification_service_server_stopped))
-		// .setContentText("Ponyponypony");
-		// postNotification();
 
 		adapter = BluetoothAdapter.getDefaultAdapter();
-		if (adapter != null) {
+		if (adapter != null && isSensorActive()) {
 			server = new BluetoothServer(adapter, serviceHandler);
 			if (adapter.isEnabled()) {
 				server.startup();
 				server.start();
 			}
 		}
+		client = new BluetoothClient(serviceHandler);
 
 	}
 
@@ -228,9 +265,19 @@ public class FreefallService extends Service {
 			if (action > 0) {
 				Message msg = serviceHandler.obtainMessage();
 				switch (action) {
-					case MSG_DISPLAY_NOTIFICATION:
+					case ACTION_CHANGE_NOTIFICATION_DISPLAY:
 						msg.what = MSG_DISPLAY_NOTIFICATION;
-						msg.arg1 = intent.getExtras().getBoolean(EXTRA_DISPLA_NOTIFICATION) ? 1 : 0;
+						msg.obj = intent.getExtras().getBoolean(EXTRA_DISPLA_NOTIFICATION);
+						break;
+					case ACTION_CONNECT_SENSOR:
+						break;
+					case ACTION_SENSOR_TYPE_CHANGE:
+						break;
+					case ACTION_SENSOR_WRITE:
+						String data = intent.getStringExtra(EXTRA_WRITE_DATA);
+						if (sensor != null) {
+							sensor.write(data);
+						}
 						break;
 				}
 				serviceHandler.sendMessage(msg);
@@ -254,5 +301,9 @@ public class FreefallService extends Service {
 		if (preferences.getBoolean(getString(R.string.DISPLAY_NOTIFICATION), true) && isAlive) {
 			notificationManager.notify(notificationID, notificationBuilder.build());
 		}
+	}
+
+	private boolean isSensorActive() {
+		return preferences.getBoolean(getString(R.string.SENSOR_ACTIVE), false);
 	}
 }
