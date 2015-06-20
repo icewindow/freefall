@@ -2,9 +2,11 @@ package net.icewindow.freefall.service.bluetooth;
 
 import java.io.IOException;
 
+import net.icewindow.freefall.service.FreefallService;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.os.Message;
 
 public class BluetoothClient implements IBluetoothConnection {
 
