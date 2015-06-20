@@ -1,13 +1,14 @@
 package net.icewindow.freefall.activity;
 
 import net.icewindow.freefall.R;
-import net.icewindow.freefall.mail.Mail;
+import net.icewindow.freefall.mail.GMailSender;
 import net.icewindow.freefall.service.FreefallService;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -77,15 +78,23 @@ public class MainActivity extends Activity {
 						@Override
 						public void run() {
 							String user = preferences.getString(getString(R.string.MAIL_ADDRESS_FROM), "");
-							Mail mail = new Mail(MainActivity.this, user, preferences.getString(
-									getString(R.string.MAIL_AUTH_PASSWORD), ""));
-							mail.setFrom(user);
-							mail.setTo(new String[] { user });
-							mail.addBodyText("This is a test");
-							mail.setSubject("Freefall test");
-							if (mail.send()) {
-							} else {
+							String pass = preferences.getString(getString(R.string.MAIL_AUTH_PASSWORD), "");
+							try {
+								GMailSender sender = new GMailSender(user, pass);
+								sender.sendMail("Freefall Test", "Freefall test message", user,
+										preferences.getString(getString(R.string.MAIL_ADDRESS_TO), ""));
+							} catch (Exception e) {
+								Log.e("GMailSender@MainActivity", "Error sending mail", e);
 							}
+							// Mail mail = new Mail(MainActivity.this, user, preferences.getString(
+							// getString(R.string.MAIL_AUTH_PASSWORD), ""));
+							// mail.setFrom(user);
+							// mail.setTo(new String[] { user });
+							// mail.addBodyText("This is a test");
+							// mail.setSubject("Freefall test");
+							// if (mail.send()) {
+							// } else {
+							// }
 						}
 					};
 					new Thread(runnable).start();

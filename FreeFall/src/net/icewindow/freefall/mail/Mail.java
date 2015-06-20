@@ -24,15 +24,15 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 /**
- * Mail sender Based on <a
- * href="http://www.jondev.net/articles/Sending_Emails_without_User_Intervention_(no_Intents)_in_Android"
+ * Mail sender<br/>
+ * Based on <a href="http://www.jondev.net/articles/Sending_Emails_without_User_Intervention_(no_Intents)_in_Android"
  * >http://www.jondev.net/articles/Sending_Emails_without_User_Intervention_(no_Intents)_in_Android</a>
  * 
  * @author icewindow
  *
  */
 public class Mail extends javax.mail.Authenticator {
-	
+
 	public static final String TAG = "FreefallMail";
 
 	private String host;
@@ -97,8 +97,7 @@ public class Mail extends javax.mail.Authenticator {
 	public boolean send() {
 		Properties properties = getProperties();
 
-		if (!user.equals("") && !pass.equals("") && to.length > 0 && !from.equals("") && !subject.equals("")
-				&& body.length() > 0) {
+		if (!user.equals("") && !pass.equals("") && to.length > 0 && !from.equals("") && !subject.equals("") && body.length() > 0) {
 			Session session = Session.getInstance(properties, this);
 			try {
 				MimeMessage message = new MimeMessage(session);

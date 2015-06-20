@@ -12,7 +12,7 @@ public interface IRealtimeGraphModel {
 	 * @return Value set identifier (used for {@link #addValue(int, int)}
 	 * @see #addValue(int, int)
 	 */
-	public int addValueSet(Paint paint);
+	public void addValueSet(Paint paint, String name);
 
 	/**
 	 * Adds one data point to a value set
@@ -23,21 +23,21 @@ public interface IRealtimeGraphModel {
 	 *            Data to be added to the value set
 	 * @see #addValueSet(Class, Paint)
 	 */
-	public void addValue(int valueSetId, double data);
+	public void addValue(String valueSetName, double data);
 
 	/**
 	 * Delete values in a given value set
 	 * 
 	 * @param valueSetId
 	 */
-	public void clearValues(int valueSetId);
+	public void clearValues(String valueSetName);
 
 	/**
 	 * Removes a value set
 	 * 
 	 * @param valueSetId
 	 */
-	public void removeValueSet(int valueSetId);
+	public void removeValueSet(String valueSetName);
 
 	/**
 	 * Commits the changes to the model (notifies observers)

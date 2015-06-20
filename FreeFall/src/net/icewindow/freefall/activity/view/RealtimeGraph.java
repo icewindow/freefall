@@ -1,10 +1,9 @@
 package net.icewindow.freefall.activity.view;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-
-import org.apache.http.client.CircularRedirectException;
 
 import net.icewindow.freefall.activity.model.RealtimeGraphModel;
 import net.icewindow.freefall.activity.model.ValueSet;
@@ -17,11 +16,9 @@ import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.HeterogeneousExpandableList;
 
 @SuppressWarnings("unused")
 public class RealtimeGraph extends SurfaceView implements SurfaceHolder.Callback, Observer {
@@ -488,9 +485,8 @@ public class RealtimeGraph extends SurfaceView implements SurfaceHolder.Callback
 
 		c.restore();
 
-		ArrayList<ValueSet> valueSets = model.getValueSets();
-
-		for (ValueSet set : valueSets) {
+		Map<String, ValueSet> valueSets = model.getValueSets();
+		for (ValueSet set : valueSets.values()) {
 			double scale = set.getScale();
 			paint.set(set.getPaint());
 			ArrayList<Double> values = set.getValues();

@@ -13,17 +13,10 @@ public class ValueSet implements IValueSet {
 
 	private Paint paint;
 
-	private String name;
-
-	public ValueSet(Paint paint, String name) {
+	public ValueSet(Paint paint) {
 		values = new ArrayList<Double>();
 		scale = 1.0d;
 		this.paint = new Paint(paint);
-		this.name = name;
-	}
-
-	public ValueSet(Paint paint) {
-		this(paint, null);
 	}
 
 	@Override
@@ -70,13 +63,5 @@ public class ValueSet implements IValueSet {
 	public Paint getPaint() {
 		return paint;
 	}
-
-	public boolean isNamed() {
-		return name != null;
-	}
 	
-	public String getName() {
-		return name;
-	}
-
 }

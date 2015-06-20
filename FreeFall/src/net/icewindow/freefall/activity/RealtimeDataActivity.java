@@ -5,28 +5,28 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 import net.icewindow.freefall.R;
 import net.icewindow.freefall.activity.model.RealtimeGraphModel;
 import net.icewindow.freefall.activity.model.ValueSet;
 import net.icewindow.freefall.activity.view.RealtimeGraph;
-import net.icewindow.freefall.bluetooth.BluetoothManager;
-import net.icewindow.freefall.bluetooth.ConnectedDevice;
-import net.icewindow.freefall.service.RealtimeDataMessageHandler;
+import net.icewindow.freefall.service.FreefallService;
+import net.icewindow.freefall.service.FreefallService.ServiceBinder;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.util.JsonWriter;
@@ -44,13 +44,24 @@ public class RealtimeDataActivity extends Activity {
 
 	private RealtimeGraph graph;
 
-	private BluetoothManager btmanager;
-
 	private SharedPreferences preferences;
 
-	private RealtimeDataMessageHandler rtdvt;
+	private ServiceBinder binder;
 
-	private int graphX, graphY, graphZ, graphVector;
+	public static final String graphX = "X", graphY = "Y", graphZ = "Z", graphVector = "Vector";
+
+	private ServiceConnection serviceConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			binder = (ServiceBinder) service;
+			binder.attachModel(graph.getModel());
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,43 +80,26 @@ public class RealtimeDataActivity extends Activity {
 
 		Paint paint = new Paint();
 		paint.setColor(0xffff0000);
-		graphX = graph.getModel().addValueSet(paint, "X");
+		graph.getModel().addValueSet(paint, graphX);
 		paint.setColor(0xff00ff00);
-		graphY = graph.getModel().addValueSet(paint, "Y");
+		graph.getModel().addValueSet(paint, graphY);
 		paint.setColor(0xff0000ff);
-		graphZ = graph.getModel().addValueSet(paint, "Z");
+		graph.getModel().addValueSet(paint, graphZ);
 		paint.setColor(0xff1ce1ce);
-		graphVector = graph.getModel().addValueSet(paint, "Vector");
-
-		rtdvt = new RealtimeDataMessageHandler(graphX, graphY, graphZ, graphVector, graph.getModel(), this);
-		Handler.Callback handlerCallback = rtdvt;
-		Handler handler = new Handler(handlerCallback);
-		btmanager = new BluetoothManager(handler);
+		graph.getModel().addValueSet(paint, graphVector);
 
 		{
 			Button b = (Button) findViewById(R.id.btn_connect);
 			b.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Toast.makeText(RealtimeDataActivity.this, R.string.text_connecting, Toast.LENGTH_SHORT).show();
-					String address = preferences.getString(getString(R.string.SENSOR_ADDRESS), "");
-					if (address.equals("")) {
-						Toast.makeText(RealtimeDataActivity.this, R.string.text_connecting_failed, Toast.LENGTH_SHORT)
-								.show();
-						return;
-					}
-					BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
-					btmanager.establishConnection(device);
-
+					Intent intent = new Intent(FreefallService.INTENT_NAME);
+					intent.putExtra(FreefallService.EXTRA_SERVICE_BINDER, RealtimeDataActivity.class);
+					bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 				}
 			});
 		}
 
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
 	}
 
 	/**
@@ -122,10 +116,8 @@ public class RealtimeDataActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.realtime_data, menu);
-		menu.findItem(R.id.menu_toggle_x).setChecked(
-				preferences.getBoolean(getString(R.string.GRAPH_DRAW_X_GRID), false));
-		menu.findItem(R.id.menu_toggle_y).setChecked(
-				preferences.getBoolean(getString(R.string.GRAPH_DRAW_Y_GRID), true));
+		menu.findItem(R.id.menu_toggle_x).setChecked(preferences.getBoolean(getString(R.string.GRAPH_DRAW_X_GRID), false));
+		menu.findItem(R.id.menu_toggle_y).setChecked(preferences.getBoolean(getString(R.string.GRAPH_DRAW_Y_GRID), true));
 		return true;
 	}
 
@@ -177,13 +169,7 @@ public class RealtimeDataActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (isFinishing()) {
-			rtdvt.setRunning(false);
-			ArrayList<ConnectedDevice> devices = btmanager.getConnectedDevices();
-			for (ConnectedDevice device : devices) {
-				device.disconnect();
-			}
-		}
+		unbindService(serviceConnection);
 	}
 
 	public void saveModelToFile() {
@@ -195,7 +181,7 @@ public class RealtimeDataActivity extends Activity {
 		Date date = new Date();
 		File file = new File(dataDir, sdf.format(date) + ".json");
 
-		ArrayList<ValueSet> valueSets = graph.getModel().getValueSets();
+		Map<String, ValueSet> valueSets = graph.getModel().getValueSets();
 		FileWriter fileWriter = null;
 		BufferedWriter bufferedWriter = null;
 		JsonWriter writer = null;
@@ -206,22 +192,17 @@ public class RealtimeDataActivity extends Activity {
 			writer = new JsonWriter(bufferedWriter);
 			writer.setIndent("  ");
 			writer.beginObject();
-			for (ValueSet set : valueSets) {
-				ArrayList<Double> values = set.getValues();
-				if (set.isNamed()) {
-					writer.name(set.getName());
-				} else {
-					writer.name("valueSet");
-				}
+			for (String key : valueSets.keySet()) {
+				ValueSet set = valueSets.get(key);
+				writer.name(key);
 				writer.beginArray();
-				for (double value : values) {
+				for (double value : set.getValues()) {
 					writer.value(value);
 				}
 				writer.endArray();
 			}
 			writer.endObject();
-			Toast.makeText(getApplicationContext(), getString(R.string.text_saved, file.getName()), Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(getApplicationContext(), getString(R.string.text_saved, file.getName()), Toast.LENGTH_SHORT).show();
 		} catch (IOException e) {
 			Toast.makeText(getApplicationContext(), R.string.text_saving_error, Toast.LENGTH_SHORT).show();
 			Log.e(TAG, "Error writing to file!!", e);

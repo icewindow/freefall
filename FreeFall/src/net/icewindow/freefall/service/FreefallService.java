@@ -2,6 +2,7 @@ package net.icewindow.freefall.service;
 
 import net.icewindow.freefall.R;
 import net.icewindow.freefall.activity.MainActivity;
+import net.icewindow.freefall.activity.RealtimeDataActivity;
 import net.icewindow.freefall.activity.model.RealtimeGraphModel;
 import net.icewindow.freefall.service.bluetooth.BluetoothClient;
 import net.icewindow.freefall.service.bluetooth.BluetoothServer;
@@ -10,6 +11,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,16 +44,25 @@ public class FreefallService extends Service {
 	public static final String INTENT_NAME = "net.icewindow.freefall.intent.action.DATA_SERVICE";
 
 	/**
-	 * Extra for notification visibility
+	 * Boolean extra for {@link FreefallService#ACTION_CHANGE_NOTIFICATION_DISPLAY}
 	 */
-	public static final String EXTRA_DISPLA_NOTIFICATION = "net.icewindow.freefall.extra.DISPLAY_NOTIFICATION";
+	public static final String EXTRA_DISPLAY_NOTIFICATION = "net.icewindow.freefall.extra.DISPLAY_NOTIFICATION";
 	/**
-	 * The String data extra for {@link FreefallService#ACTION_SENSOR_WRITE}
+	 * Boolean extra for {@link FreefallService#ACTION_SENSOR_TYPE_CHANGE}
 	 */
-	public static final String EXTRA_WRITE_DATA = "net.icewindow.freefall.extra.WRITA_DATA";
+	public static final String EXTRA_SENSOR_TYPE = "net.icewindow.freefall.extra.SENSOR_TYPE";
+	/**
+	 * String extra for {@link FreefallService#ACTION_SENSOR_WRITE}
+	 */
+	public static final String EXTRA_WRITE_DATA = "net.icewindow.freefall.extra.WRITE_DATA";
+	/**
+	 * Class extra to denote who bound to the service
+	 */
+	public static final String EXTRA_SERVICE_BINDER = "net.icewindow.freefall.extra.SERVICE_BINDER";
 
 	/**
-	 * Action to signify the notification should be displayed or not
+	 * Action to signify the notification should be displayed or not<br/>
+	 * Has {@link FreefallService#EXTRA_DISPLAY_NOTIFICATION}
 	 */
 	public static final int ACTION_CHANGE_NOTIFICATION_DISPLAY = 1;
 	/**
@@ -59,12 +70,13 @@ public class FreefallService extends Service {
 	 */
 	public static final int ACTION_CONNECT_SENSOR = 2;
 	/**
-	 * Action to signify the sensor type has changed (active or passive)
+	 * Action to signify the sensor type has changed (active or passive)<br/>
+	 * Has {@link FreefallService#EXTRA_SENSOR_TYPE}
 	 */
 	public static final int ACTION_SENSOR_TYPE_CHANGE = 3;
 	/**
 	 * Action indicating we want to write to the remote device<br/>
-	 * Needs {@link FreefallService#EXTRA_WRITE_DATA}
+	 * Has {@link FreefallService#EXTRA_WRITE_DATA}
 	 */
 	public static final int ACTION_SENSOR_WRITE = 4;
 
@@ -81,7 +93,7 @@ public class FreefallService extends Service {
 	 */
 	public static final int MSG_BLUETOOTH_MESSAGE = 3;
 	/**
-	 * Messgae WHAT for server state change
+	 * Message WHAT for server state change
 	 */
 	public static final int MSG_SERVER_STATE_CHANGE = 4;
 	/**
@@ -107,13 +119,6 @@ public class FreefallService extends Service {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case MSG_DISPLAY_NOTIFICATION:
-					if (msg.arg1 == 0) {
-						notificationManager.cancel(notificationID);
-					} else {
-						postNotification();
-					}
-					break;
 				case MSG_SENSOR_CONNECT_CHANGED:
 					switch (msg.arg1) {
 						case ARG_BT_DISCONNECT:
@@ -124,16 +129,42 @@ public class FreefallService extends Service {
 								notificationBuilder
 										.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
 							}
+							sensor = null;
 							break;
 						case ARG_BT_CONNECT:
 							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_connected));
+							if (server != null) {
+								sensor = server.getRemoteDevice();
+							} else {
+								sensor = client.getRemoteDevice();
+							}
 							break;
 					}
 					postNotification();
 					break;
 				case MSG_BLUETOOTH_MESSAGE:
-					// TODO implement message handling
-					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
+					String[] parts = ((String) msg.obj).split(":");
+					if (parts[0].equals("msg")) {
+						Toast.makeText(FreefallService.this, parts[1], Toast.LENGTH_SHORT).show();
+					} else if (parts[0].equals("data")) {
+						if (model != null) {
+
+							try {
+								String[] data = parts[1].split(",");
+								float vx = Float.parseFloat(data[0]);
+								float vy = Float.parseFloat(data[1]);
+								float vz = Float.parseFloat(data[2]);
+								float vv = Float.parseFloat(data[3]);
+								model.addValue(RealtimeDataActivity.graphX, vx);
+								model.addValue(RealtimeDataActivity.graphY, vy);
+								model.addValue(RealtimeDataActivity.graphZ, vz);
+								model.addValue(RealtimeDataActivity.graphVector, vv);
+								model.commit();
+							} catch (Exception e) {
+								// Messages sometimes get corrupted. In that case, ignore that
+							}
+						}
+					}
 					break;
 				case MSG_SERVER_STATE_CHANGE:
 					switch (msg.arg1) {
@@ -165,6 +196,13 @@ public class FreefallService extends Service {
 
 		public int getServerStatus() {
 			return 0;
+		}
+
+		public void attachModel(RealtimeGraphModel model) {
+			FreefallService.this.model = model;
+			if (sensor != null) {
+				sensor.write("1");
+			}
 		}
 	}
 
@@ -209,6 +247,10 @@ public class FreefallService extends Service {
 
 	@Override
 	public boolean onUnbind(Intent intent) {
+		if (sensor != null && model != null) {
+			sensor.write("0");
+		}
+		model = null;
 		return super.onUnbind(intent);
 	}
 
@@ -231,27 +273,23 @@ public class FreefallService extends Service {
 		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationBuilder = new NotificationCompat.Builder(getApplicationContext());
 
-		Intent intent;
-		if (isSensorActive()) {
-			intent = new Intent(this, MainActivity.class);
-		} else {
-			intent = new Intent(INTENT_NAME);
-			intent.putExtra(EXTRA_ACTION_DESCRIPTOR, ACTION_CONNECT_SENSOR);
-		}
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-		stackBuilder.addNextIntent(intent);
-		PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent pendingIntent = buildNotificationIntent();
 		notificationBuilder.setSmallIcon(R.drawable.ic_freefall_service)
 				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setOngoing(true)
 				.setContentIntent(pendingIntent).setTicker(getString(R.string.notification_service_ticker))
 				.setContentTitle(getString(R.string.notification_service_title));
 
 		adapter = BluetoothAdapter.getDefaultAdapter();
-		if (adapter != null && isSensorActive()) {
-			server = new BluetoothServer(adapter, serviceHandler);
-			if (adapter.isEnabled()) {
-				server.startup();
-				server.start();
+		if (adapter != null) {
+			if (isSensorActive()) {
+				server = new BluetoothServer(adapter, serviceHandler);
+				if (adapter.isEnabled()) {
+					server.startup();
+					server.start();
+				}
+			} else {
+				notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
+				postNotification();
 			}
 		}
 		client = new BluetoothClient(serviceHandler);
@@ -263,15 +301,34 @@ public class FreefallService extends Service {
 		if (intent != null) {
 			int action = intent.getIntExtra(EXTRA_ACTION_DESCRIPTOR, 0);
 			if (action > 0) {
-				Message msg = serviceHandler.obtainMessage();
 				switch (action) {
 					case ACTION_CHANGE_NOTIFICATION_DISPLAY:
-						msg.what = MSG_DISPLAY_NOTIFICATION;
-						msg.obj = intent.getExtras().getBoolean(EXTRA_DISPLA_NOTIFICATION);
+						if (intent.getExtras().getBoolean(EXTRA_DISPLAY_NOTIFICATION)) {
+							postNotification();
+						} else {
+							notificationManager.cancel(notificationID);
+						}
 						break;
 					case ACTION_CONNECT_SENSOR:
+						String address = preferences.getString(getString(R.string.SENSOR_ADDRESS), "");
+						if (address != "") {
+							BluetoothDevice device = adapter.getRemoteDevice(address);
+							notificationBuilder
+									.setContentText(getString(R.string.notification_service_sensor_connecting_passive));
+							postNotification();
+							client.connectToServer(device);
+						}
 						break;
 					case ACTION_SENSOR_TYPE_CHANGE:
+						boolean sensorActive = intent.getBooleanExtra(EXTRA_SENSOR_TYPE, false);
+						PendingIntent pendingIntent = buildNotificationIntent(sensorActive);
+						notificationBuilder.setContentIntent(pendingIntent);
+						if (sensorActive) {
+							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+						} else {
+							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
+						}
+						postNotification();
 						break;
 					case ACTION_SENSOR_WRITE:
 						String data = intent.getStringExtra(EXTRA_WRITE_DATA);
@@ -280,7 +337,6 @@ public class FreefallService extends Service {
 						}
 						break;
 				}
-				serviceHandler.sendMessage(msg);
 			}
 		}
 
@@ -305,5 +361,25 @@ public class FreefallService extends Service {
 
 	private boolean isSensorActive() {
 		return preferences.getBoolean(getString(R.string.SENSOR_ACTIVE), false);
+	}
+
+	private PendingIntent buildNotificationIntent() {
+		return buildNotificationIntent(isSensorActive());
+	}
+
+	private PendingIntent buildNotificationIntent(boolean sensorActive) {
+		PendingIntent pendingIntent = null;
+		if (sensorActive) {
+			Intent intent = new Intent(this, MainActivity.class);
+			TaskStackBuilder stackBuilder = TaskStackBuilder.create(FreefallService.this);
+			stackBuilder.addNextIntent(intent);
+			pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		} else {
+			Intent intent = new Intent(INTENT_NAME);
+			intent.putExtra(EXTRA_ACTION_DESCRIPTOR, ACTION_CONNECT_SENSOR);
+			pendingIntent = PendingIntent.getService(FreefallService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		}
+		return pendingIntent;
 	}
 }

@@ -17,8 +17,7 @@ public class SettingsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new BasicSettingsFragment()).commit();
-		PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(
-				preferenceChangedListener);
+		PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(preferenceChangedListener);
 	}
 
 	OnSharedPreferenceChangeListener preferenceChangedListener = new OnSharedPreferenceChangeListener() {
@@ -26,10 +25,13 @@ public class SettingsActivity extends Activity {
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if (key.equals(getString(R.string.DISPLAY_NOTIFICATION))) {
 				Intent intent = new Intent(FreefallService.INTENT_NAME);
-				intent.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR,
-						FreefallService.MSG_DISPLAY_NOTIFICATION);
-				intent.putExtra(FreefallService.EXTRA_DISPLA_NOTIFICATION,
-						sharedPreferences.getBoolean(key, true));
+				intent.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR, FreefallService.ACTION_CHANGE_NOTIFICATION_DISPLAY);
+				intent.putExtra(FreefallService.EXTRA_DISPLAY_NOTIFICATION, sharedPreferences.getBoolean(key, true));
+				startService(intent);
+			} else if (key.equals(getString(R.string.SENSOR_ACTIVE))) {
+				Intent intent = new Intent(FreefallService.INTENT_NAME);
+				intent.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR, FreefallService.ACTION_SENSOR_TYPE_CHANGE);
+				intent.putExtra(FreefallService.EXTRA_SENSOR_TYPE, sharedPreferences.getBoolean(key, false));
 				startService(intent);
 			}
 		}

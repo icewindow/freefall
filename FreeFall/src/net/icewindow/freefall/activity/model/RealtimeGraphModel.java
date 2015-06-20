@@ -1,6 +1,7 @@
 package net.icewindow.freefall.activity.model;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 
 import net.icewindow.freefall.interfaces.IRealtimeGraphModel;
@@ -8,18 +9,15 @@ import android.graphics.Paint;
 
 public class RealtimeGraphModel extends Observable implements IRealtimeGraphModel {
 
-	private ArrayList<ValueSet> valueSets;
+	private Map<String, ValueSet> valueSets;
 
 	private int scalePositive;
 	private int scaleNegative;
 	private int scaleX, offsetX, width;
 	private boolean drawNumbersX = false, drawNumbersY = true, drawGridX = true, drawGridY = true;
 
-	private int lastValueSetId;
-
 	public RealtimeGraphModel() {
-		valueSets = new ArrayList<ValueSet>();
-		lastValueSetId = 0;
+		valueSets = new HashMap<String, ValueSet>();
 		scalePositive = 1;
 		scaleNegative = 1;
 		width = 1000;
@@ -28,19 +26,13 @@ public class RealtimeGraphModel extends Observable implements IRealtimeGraphMode
 	}
 
 	@Override
-	public int addValueSet(Paint paint) {
-		valueSets.add(new ValueSet(paint));
-		return lastValueSetId++;
-	}
-
-	public int addValueSet(Paint paint, String name) {
-		valueSets.add(new ValueSet(paint, name));
-		return lastValueSetId++;
+	public void addValueSet(Paint paint, String name) {
+		valueSets.put(name, new ValueSet(paint));
 	}
 
 	@Override
-	public void addValue(int valueSetId, double data) {
-		valueSets.get(valueSetId).addValue(data);
+	public void addValue(String valueSetName, double data) {
+		valueSets.get(valueSetName).addValue(data);
 		if (data < 0) {
 			if (Math.abs(data) > scaleNegative) {
 				scaleNegative = (int) Math.ceil(Math.abs(data));
@@ -53,13 +45,13 @@ public class RealtimeGraphModel extends Observable implements IRealtimeGraphMode
 	}
 
 	@Override
-	public void clearValues(int valueSetId) {
+	public void clearValues(String valueSetId) {
 		valueSets.get(valueSetId).clearValues();
 	}
 
 	@Override
-	public void removeValueSet(int valueSetId) {
-		// TODO Remove value set
+	public void removeValueSet(String valueSetId) {
+		valueSets.remove(valueSetId);
 	}
 
 	@Override
@@ -69,7 +61,7 @@ public class RealtimeGraphModel extends Observable implements IRealtimeGraphMode
 	}
 
 	@Override
-	public ArrayList<ValueSet> getValueSets() {
+	public Map<String, ValueSet> getValueSets() {
 		return valueSets;
 	}
 

@@ -41,6 +41,7 @@ public class BluetoothClient implements IBluetoothConnection {
 
 	protected void connectDevice(BluetoothSocket socket) {
 		server = new ConnectedDevice(socket, handler);
+		server.start();
 	}
 
 	@Override

@@ -9,6 +9,11 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * @deprecated
+ * @author icewindow
+ *
+ */
 public class RealtimeDataMessageHandler implements Handler.Callback {
 
 	private final String TAG = "Realtime Data Thread";
@@ -41,10 +46,10 @@ public class RealtimeDataMessageHandler implements Handler.Callback {
 					float vy = Float.parseFloat(parts[1]);
 					float vz = Float.parseFloat(parts[2]);
 					float vv = Float.parseFloat(parts[3]);
-					model.addValue(x, vx);
-					model.addValue(y, vy);
-					model.addValue(z, vz);
-					model.addValue(v, vv);
+//					model.addValue(x, vx);
+//					model.addValue(y, vy);
+//					model.addValue(z, vz);
+//					model.addValue(v, vv);
 					model.commit();
 				} catch (Exception e) {
 				}
