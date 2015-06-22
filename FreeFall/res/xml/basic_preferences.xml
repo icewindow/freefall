@@ -7,7 +7,13 @@
             android:title="@string/pref.bluetooth.host" >
             <intent android:action="@string/INTENT_BLUETOOTH_PICKER" />
         </Preference>
-        <CheckBoxPreference android:summaryOff="@string/pref.bluetooth.active.hint.unchecked" android:summaryOn="@string/pref.bluetooth.active.hint.checked" android:key="@string/SENSOR_ACTIVE" android:title="@string/pref.bluetooth.active" android:defaultValue="false"/>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/SENSOR_ACTIVE"
+            android:summaryOff="@string/pref.bluetooth.active.hint.unchecked"
+            android:summaryOn="@string/pref.bluetooth.active.hint.checked"
+            android:title="@string/pref.bluetooth.active" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref.graph.title" >
         <CheckBoxPreference
@@ -60,6 +66,10 @@
                 android:inputType="textPassword"
                 android:key="@string/MAIL_AUTH_PASSWORD"
                 android:title="@string/pref.mail.login.pass" />
+        </PreferenceCategory>
+        <PreferenceCategory android:title="@string/pref.mail.server.title" >
+            <EditTextPreference android:title="@string/pref.mail.server.address" android:summary="@string/pref.mail.server.address.hint" android:defaultValue="@string/pref.mail.server.address.default" android:key="@string/MAIL_SERVER_ADDRESS"/>
+            <EditTextPreference android:title="@string/pref.mail.server.port" android:summary="@string/pref.mail.server.port.hint" android:defaultValue="@string/pref.mail.server.port.default" android:key="@string/MAIL_SERVER_PORT"/>
         </PreferenceCategory>
     </PreferenceScreen>
 

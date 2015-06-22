@@ -20,10 +20,17 @@
     <string name="pref.mail.address.to">Recipient address</string>
     <string name="pref.mail.address.to.hint">To whom to send the mails</string>
     <string name="pref.mail.login.title">Login data</string>
-    <string name="pref.mail.login.senderIsUser">Sender address is username</string><string name="pref.mail.login.senderIsUser.hint">Uncheck if outbox username and sender address are different</string><string name="pref.mail.login.user">Sender username</string>
+    <string name="pref.mail.login.senderIsUser">Sender address is username</string>
+    <string name="pref.mail.login.senderIsUser.hint">Uncheck if outbox username and sender address are different</string>
+    <string name="pref.mail.login.user">Sender username</string>
     <string name="pref.mail.login.pass">Password</string>
     <string name="pref.mail.placeholder">john.doe@example.com</string>
-    
-    
+    <string name="pref.mail.server.title">Server settings</string>
+    <string name="pref.mail.server.address">Server address</string>
+    <string name="pref.mail.server.address.hint">Enter the address your SMTP server is at</string>
+    <string name="pref.mail.server.address.default">smtp.gmail.com</string>
+    <string name="pref.mail.server.port">Server port</string>
+    <string name="pref.mail.server.port.hint">Enter the port your SMTP server uses</string>
+    <string name="pref.mail.server.port.default">465</string>
 
 </resources>

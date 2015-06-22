@@ -1,7 +1,6 @@
 package net.icewindow.freefall.activity;
 
 import net.icewindow.freefall.R;
-import net.icewindow.freefall.mail.GMailSender;
 import net.icewindow.freefall.service.FreefallService;
 import net.icewindow.freefall.service.bluetooth.BluetoothClient;
 import net.icewindow.freefall.service.bluetooth.ConnectedDevice;
@@ -14,16 +13,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends Activity {
-	
+
 	private final static class ConnectHandler extends Handler {
 		private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
 		@Override
 		public void handleMessage(Message msg) {
 			if (msg.what == FreefallService.MSG_BT_CLIENT_READY) {
@@ -92,30 +91,11 @@ public class MainActivity extends Activity {
 			btn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Runnable runnable = new Runnable() {
-						@Override
-						public void run() {
-							String user = preferences.getString(getString(R.string.MAIL_ADDRESS_FROM), "");
-							String pass = preferences.getString(getString(R.string.MAIL_AUTH_PASSWORD), "");
-							try {
-								GMailSender sender = new GMailSender(user, pass);
-								sender.sendMail("Freefall Test", "Freefall test message", user,
-										preferences.getString(getString(R.string.MAIL_ADDRESS_TO), ""));
-							} catch (Exception e) {
-								Log.e("GMailSender@MainActivity", "Error sending mail", e);
-							}
-							// Mail mail = new Mail(MainActivity.this, user, preferences.getString(
-							// getString(R.string.MAIL_AUTH_PASSWORD), ""));
-							// mail.setFrom(user);
-							// mail.setTo(new String[] { user });
-							// mail.addBodyText("This is a test");
-							// mail.setSubject("Freefall test");
-							// if (mail.send()) {
-							// } else {
-							// }
-						}
-					};
-					new Thread(runnable).start();
+					Intent intent = new Intent(FreefallService.INTENT_NAME);
+					intent.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR, FreefallService.ACTION_SEND_MAIL);
+					intent.putExtra(FreefallService.EXTRA_EMAIL_BODY, "Freefall test mail");
+					intent.putExtra(FreefallService.EXTRA_EMAIL_SUBJECT, "Freefall Test message");
+					startService(intent);
 				}
 			});
 		}
@@ -147,10 +127,10 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.action_settings:
-			Intent intent = new Intent(this, SettingsActivity.class);
-			startActivity(intent);
-			break;
+			case R.id.action_settings:
+				Intent intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
+				break;
 		}
 		return super.onOptionsItemSelected(item);
 	}

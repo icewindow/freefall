@@ -1,5 +1,15 @@
 package net.icewindow.freefall.service;
 
+import java.util.Properties;
+
+import javax.mail.Authenticator;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 import net.icewindow.freefall.R;
 import net.icewindow.freefall.activity.MainActivity;
 import net.icewindow.freefall.activity.RealtimeDataActivity;
@@ -59,6 +69,14 @@ public class FreefallService extends Service {
 	 * Class extra to denote who bound to the service
 	 */
 	public static final String EXTRA_SERVICE_BINDER = "net.icewindow.freefall.extra.SERVICE_BINDER";
+	/**
+	 * String mail body extra for {@link FreefallService#ACTION_SEND_MAIL}
+	 */
+	public static final String EXTRA_EMAIL_BODY = "net.icewindow.freefall.extra.MAIL_BODY";
+	/**
+	 * String subject extra for {@link FreefallService#ACTION_SEND_MAIL}
+	 */
+	public static final String EXTRA_EMAIL_SUBJECT = "net.icewindow.freefall.extra.MAIL_BODY";
 
 	/**
 	 * Action to signify the notification should be displayed or not<br/>
@@ -79,6 +97,11 @@ public class FreefallService extends Service {
 	 * Has {@link FreefallService#EXTRA_WRITE_DATA}
 	 */
 	public static final int ACTION_SENSOR_WRITE = 4;
+	/**
+	 * Action indicating we want to send an email<br/>
+	 * Has {@link FreefallService#EXTRA_EMAIL_SUBJECT} and {@link FreefallService#EXTRA_EMAIL_BODY}
+	 */
+	public static final int ACTION_SEND_MAIL = 5;
 
 	/**
 	 * Message WHAT for notification visibility change
@@ -100,6 +123,10 @@ public class FreefallService extends Service {
 	 * Message WHAT for Bluetooth client connection ready
 	 */
 	public static final int MSG_BT_CLIENT_READY = 5;
+	/**
+	 * Send an email
+	 */
+	public static final int MSG_SEND_MAIL = 6;
 	/**
 	 * Make a Toast
 	 */
@@ -181,6 +208,54 @@ public class FreefallService extends Service {
 					}
 					postNotification();
 					break;
+				case MSG_SEND_MAIL:
+					Intent intent = (Intent) msg.obj;
+					final String username;
+					if (preferences.getBoolean(getString(R.string.MAIL_AUTH_SENDERISUSER), false)) {
+						username = preferences.getString(getString(R.string.MAIL_ADDRESS_FROM), "");
+					} else {
+						username = preferences.getString(getString(R.string.MAIL_AUTH_USER), "");
+					}
+					final String password = preferences.getString(getString(R.string.MAIL_AUTH_PASSWORD), "");
+					String from = preferences.getString(getString(R.string.MAIL_ADDRESS_FROM), "");
+					String to = preferences.getString(getString(R.string.MAIL_ADDRESS_TO), "");
+
+					Properties props = new Properties();
+					// props.put("mail.smtp.host", "smtp.gmail.com");
+					// props.put("mail.smtp.port", "465");
+					// props.put("mail.smtp.auth", "true");
+					// props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+					// props.put("mail.smtp.socketFactory.port", "465");
+
+					props.put("mail.smtp.host", preferences.getString(getString(R.string.MAIL_SERVER_ADDRESS), "smtp.gmail.com"));
+					props.put("mail.smtp.port", preferences.getString(getString(R.string.MAIL_SERVER_PORT), "465"));
+					props.put("mail.smtp.auth", "true");
+					props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+					props.put("mail.smtp.socketFactory.port", "465");
+
+					Session session = Session.getDefaultInstance(props, new Authenticator() {
+						@Override
+						protected PasswordAuthentication getPasswordAuthentication() {
+							return new PasswordAuthentication(username, password);
+						}
+					});
+
+					try {
+						javax.mail.Message message = new MimeMessage(session);
+						message.setFrom(new InternetAddress(from));
+						message.setRecipients(javax.mail.Message.RecipientType.TO, InternetAddress.parse(to));
+						message.setSubject(intent.getStringExtra(EXTRA_EMAIL_SUBJECT));
+						message.setContent(intent.getStringExtra(EXTRA_EMAIL_BODY), "text/plain;");
+
+						Log.d("FreefallServiceMail", "Sending email...");
+						Transport.send(message);
+						Log.d("FreefallServiceMail", "Done!");
+					} catch (MessagingException e) {
+						e.printStackTrace();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					break;
 				case MSG_TOAST:
 					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
 					break;
@@ -242,7 +317,7 @@ public class FreefallService extends Service {
 
 	private RealtimeGraphModel model;
 
-	private static final String TAG = "DataAcquisitionService";
+	private static final String TAG = "FreefallService";
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -339,6 +414,11 @@ public class FreefallService extends Service {
 						if (sensor != null) {
 							sensor.write(data);
 						}
+						break;
+					case ACTION_SEND_MAIL:
+						Message msg = serviceHandler.obtainMessage(MSG_SEND_MAIL);
+						msg.obj = intent;
+						serviceHandler.sendMessage(msg);
 						break;
 				}
 			}

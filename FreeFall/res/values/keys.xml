@@ -10,6 +10,8 @@
     <string name="MAIL_AUTH_USER">mail.auth.user</string>
     <string name="MAIL_AUTH_PASSWORD">mail.auth.password</string>
     <string name="MAIL_AUTH_SENDERISUSER">mail.auth.senderIsUser</string>
+    <string name="MAIL_SERVER_ADDRESS">mail.server.address</string>
+    <string name="MAIL_SERVER_PORT">mail.server.port</string>
     <string name="SETUP_COMPLETE">setup.complete</string>
     <string name="SENSOR_ACTIVE">bluetooth.sensor.active</string>
     <string name="SENSOR_ADDRESS">bluetooth.sensor.address</string>
