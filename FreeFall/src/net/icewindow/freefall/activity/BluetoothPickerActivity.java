@@ -73,8 +73,8 @@ public class BluetoothPickerActivity extends Activity {
 				intent = new Intent(BluetoothPickerActivity.this, MainActivity.class);
 			}
 			preferences.edit().putString(getString(R.string.SENSOR_ADDRESS), address).commit();
-			Toast.makeText(BluetoothPickerActivity.this,
-					getString(R.string.text_bluetooth_selectedDevice, deviceName, address), Toast.LENGTH_SHORT).show();
+			Toast.makeText(BluetoothPickerActivity.this, getString(R.string.text_bluetooth_selectedDevice, deviceName, address),
+					Toast.LENGTH_SHORT).show();
 			BluetoothPickerActivity.this.finish();
 			if (intent != null) startActivity(intent);
 		}
@@ -97,8 +97,7 @@ public class BluetoothPickerActivity extends Activity {
 			} else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
 				((Button) findViewById(R.id.button_discovery_start)).setText(R.string.button_discovery_start);
 				Toast.makeText(BluetoothPickerActivity.this,
-						getString(R.string.text_discovery_devicecount, discoveryDeviceCount), Toast.LENGTH_SHORT)
-						.show();
+						getString(R.string.text_discovery_devicecount, discoveryDeviceCount), Toast.LENGTH_SHORT).show();
 			}
 		}
 	};
@@ -161,11 +160,8 @@ public class BluetoothPickerActivity extends Activity {
 						buildList();
 						break;
 					case RESULT_CANCELED:
-						((TextView) findViewById(R.id.bluetoothDeviceMessageView))
-								.setText(R.string.text_bluetooth_enableBT);
+						((TextView) findViewById(R.id.bluetoothDeviceMessageView)).setText(R.string.text_bluetooth_enableBT);
 						break;
-					case RESULT_FIRST_USER:
-						Toast.makeText(this, "I dunno lol ¯\\°.o/¯", Toast.LENGTH_SHORT).show();
 				}
 		}
 	}

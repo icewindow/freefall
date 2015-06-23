@@ -33,9 +33,7 @@ import android.util.JsonWriter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 public class RealtimeDataActivity extends Activity {
@@ -88,17 +86,8 @@ public class RealtimeDataActivity extends Activity {
 		paint.setColor(0xff1ce1ce);
 		graph.getModel().addValueSet(paint, graphVector);
 
-		{
-			Button b = (Button) findViewById(R.id.btn_connect);
-			b.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(FreefallService.INTENT_NAME);
-					intent.putExtra(FreefallService.EXTRA_SERVICE_BINDER, RealtimeDataActivity.class);
-					bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-				}
-			});
-		}
+		Intent intent = new Intent(FreefallService.INTENT_NAME);
+		bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
 	}
 

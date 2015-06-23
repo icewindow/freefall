@@ -12,9 +12,10 @@
     <string name="text.menu.save">Save to file</string>
     <string name="text.saving">Saving data. This might take a while ;)</string>
     <string name="text.saved">Saved data to %1$s</string>
-    <string name="text.saving.error">Error writing to file! (See LogCat)</string>
+    <string name="text.saving.error">Error writing to file!</string>
     <string name="text.menu.clear">Clear data</string>
     <string name="text.menu.grid.x">Show X gridmarks</string>
     <string name="text.menu.grid.y">Show Y gridmarks</string>
+    <string name="text.menu.startGraph">Show graph</string>
 
 </resources>

@@ -54,6 +54,18 @@ public class FreefallService extends Service {
 	public static final String INTENT_NAME = "net.icewindow.freefall.intent.action.DATA_SERVICE";
 
 	/**
+	 * Broadcast to change MainActivity's sole button's text
+	 */
+	public static final String BROADCAST_SENSOR_CONNECTION_STATE = "net.icewindow.freefall.broadcast.SENSOR_CONNECTION_STATE";
+	/**
+	 * Integer extra for {@linkplain FreefallService#BROADCAST_SENSOR_CONNECTION_STATE}<br/>
+	 * One of the following: {@link FreefallService#STATE_OFFLINE}, {@link FreefallService#STATE_ONLINE},
+	 * {@link FreefallService#STATE_CONNECTING}, {@link FreefallService#STATE_CONNECTED}
+	 * 
+	 */
+	public static final String BROADCAST_EXTRA_SENSOR_CONNECTION_STATE = "net.icewindow.freefall.broadcast.extra.SENSOR_CONNECTON_STATE";
+
+	/**
 	 * Boolean extra for {@link FreefallService#ACTION_CHANGE_NOTIFICATION_DISPLAY}
 	 */
 	public static final String EXTRA_DISPLAY_NOTIFICATION = "net.icewindow.freefall.extra.DISPLAY_NOTIFICATION";
@@ -65,10 +77,6 @@ public class FreefallService extends Service {
 	 * String extra for {@link FreefallService#ACTION_SENSOR_WRITE}
 	 */
 	public static final String EXTRA_WRITE_DATA = "net.icewindow.freefall.extra.WRITE_DATA";
-	/**
-	 * Class extra to denote who bound to the service
-	 */
-	public static final String EXTRA_SERVICE_BINDER = "net.icewindow.freefall.extra.SERVICE_BINDER";
 	/**
 	 * String mail body extra for {@link FreefallService#ACTION_SEND_MAIL}
 	 */
@@ -136,12 +144,56 @@ public class FreefallService extends Service {
 	 */
 	public static final int MSG_STOP_SERVICE = 999;
 
+	/**
+	 * Bluetooth device connected. Used by {@link FreefallService#MSG_SENSOR_CONNECT_CHANGED}
+	 */
 	public static final int ARG_BT_CONNECT = 1;
+	/**
+	 * Bluetooth device disconnected. Used by {@link FreefallService#MSG_SENSOR_CONNECT_CHANGED}
+	 */
 	public static final int ARG_BT_DISCONNECT = 0;
 
+	/**
+	 * Server started. Used by {@link FreefallService#MSG_SERVER_STATE_CHANGE}
+	 */
 	public static final int ARG_SERVER_STARTED = 1;
+	/**
+	 * Server stopped. Used by {@link FreefallService#MSG_SERVER_STATE_CHANGE}
+	 */
 	public static final int ARG_SERVER_STOPPED = 0;
 
+	/**
+	 * Server state offline
+	 */
+	public static final int STATE_OFFLINE = 0;
+	/**
+	 * Server state online
+	 */
+	public static final int STATE_ONLINE = 1;
+	/**
+	 * Device connecting
+	 */
+	public static final int STATE_CONNECTING = 2;
+	/**
+	 * Server state connected
+	 */
+	public static final int STATE_CONNECTED = 3;
+	
+	/**
+	 * Sensor mode. Send events only
+	 */
+	public static final String SENSOR_MODE_EVENTS_ONLY = "1";
+	/**
+	 * Sensor mode. Send events and raw data
+	 */
+	public static final String SENSOR_MODE_EVENTS_AND_DATA = "2";
+
+	/**
+	 * Handler implementation
+	 * 
+	 * @author icewindow
+	 *
+	 */
 	private final class ServiceHandler extends Handler {
 		public ServiceHandler(Looper looper) {
 			super(looper);
@@ -156,9 +208,11 @@ public class FreefallService extends Service {
 							if (isSensorActive()) {
 								notificationBuilder
 										.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+								setServerState(STATE_ONLINE);
 							} else {
 								notificationBuilder
 										.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
+								setServerState(STATE_OFFLINE);
 							}
 							sensor = null;
 							break;
@@ -169,6 +223,7 @@ public class FreefallService extends Service {
 							} else {
 								sensor = client.getRemoteDevice();
 							}
+							setServerState(STATE_CONNECTED);
 							break;
 					}
 					postNotification();
@@ -201,9 +256,11 @@ public class FreefallService extends Service {
 					switch (msg.arg1) {
 						case ARG_SERVER_STARTED:
 							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+							setServerState(STATE_ONLINE);
 							break;
 						case ARG_SERVER_STOPPED:
 							notificationBuilder.setContentText(getString(R.string.notification_service_server_stopped));
+							setServerState(STATE_OFFLINE);
 							break;
 					}
 					postNotification();
@@ -221,11 +278,6 @@ public class FreefallService extends Service {
 					String to = preferences.getString(getString(R.string.MAIL_ADDRESS_TO), "");
 
 					Properties props = new Properties();
-					// props.put("mail.smtp.host", "smtp.gmail.com");
-					// props.put("mail.smtp.port", "465");
-					// props.put("mail.smtp.auth", "true");
-					// props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-					// props.put("mail.smtp.socketFactory.port", "465");
 
 					props.put("mail.smtp.host", preferences.getString(getString(R.string.MAIL_SERVER_ADDRESS), "smtp.gmail.com"));
 					props.put("mail.smtp.port", preferences.getString(getString(R.string.MAIL_SERVER_PORT), "465"));
@@ -269,19 +321,22 @@ public class FreefallService extends Service {
 	 * @author icewindow
 	 */
 	public class ServiceBinder extends Binder {
-		public static final int STATE_OFFLINE = 0;
-		public static final int STATE_ONLINE = 1;
-		public static final int STATE_CONNECTED = 2;
 
 		public int getServerStatus() {
-			return 0;
+			return server_state;
 		}
 
 		public void attachModel(RealtimeGraphModel model) {
 			FreefallService.this.model = model;
 			if (sensor != null) {
-				sensor.write("1");
+				sensor.write(SENSOR_MODE_EVENTS_AND_DATA);
 			}
+		}
+
+		public void attachGUI(MainActivity activity) {
+		}
+
+		public void detachGUI() {
 		}
 	}
 
@@ -316,6 +371,7 @@ public class FreefallService extends Service {
 	private SharedPreferences preferences;
 
 	private RealtimeGraphModel model;
+	private int server_state = STATE_OFFLINE;
 
 	private static final String TAG = "FreefallService";
 
@@ -327,7 +383,7 @@ public class FreefallService extends Service {
 	@Override
 	public boolean onUnbind(Intent intent) {
 		if (sensor != null && model != null) {
-			sensor.write("0");
+			sensor.write(SENSOR_MODE_EVENTS_ONLY);
 		}
 		model = null;
 		return super.onUnbind(intent);
@@ -395,6 +451,7 @@ public class FreefallService extends Service {
 							notificationBuilder
 									.setContentText(getString(R.string.notification_service_sensor_connecting_passive));
 							postNotification();
+							setServerState(STATE_CONNECTING);
 							client.connectToServer(device);
 						}
 						break;
@@ -465,5 +522,12 @@ public class FreefallService extends Service {
 			pendingIntent = PendingIntent.getService(FreefallService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		}
 		return pendingIntent;
+	}
+
+	private void setServerState(int state) {
+		server_state = state;
+		Intent intent = new Intent(BROADCAST_SENSOR_CONNECTION_STATE);
+		intent.putExtra(BROADCAST_EXTRA_SENSOR_CONNECTION_STATE, state);
+		sendBroadcast(intent);
 	}
 }

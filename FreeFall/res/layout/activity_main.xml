@@ -9,43 +9,11 @@
     tools:context=".MainActivity" >
 
     <Button
-        android:id="@+id/btn_main_rtdv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="Graph" />
-
-    <Button
-        android:id="@+id/btn_clear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btn_main_rtdv"
-        android:layout_below="@+id/btn_main_rtdv"
-        android:text="Reset" />
-
-    <Button
-        android:id="@+id/btn_stop_service"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btn_clear"
-        android:layout_below="@+id/btn_clear"
-        android:text="Stop Service" />
-
-    <Button
-        android:id="@+id/btn_mailtest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btn_stop_service"
-        android:layout_below="@+id/btn_stop_service"
-        android:text="Send Mail" />
-
-    <Button
         android:id="@+id/btn_send_ping"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btn_mailtest"
-        android:layout_below="@+id/btn_mailtest"
-        android:text="Connect/Send ping" />
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="@string/button.main.connect" />
 
 </RelativeLayout>

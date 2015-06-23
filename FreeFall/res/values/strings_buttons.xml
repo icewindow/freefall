@@ -4,5 +4,8 @@
     <string name="button.connect">Connect Bluetooth</string>
     <string name="button.discovery.start">Start discovery</string>
     <string name="button.discovery.discovering">Discovery in progress&#8230;</string>
+    <string name="button.main.connect">Connect to sensor</string>
+    <string name="button.main.connecting">Connecting&#8230;</string>
+    <string name="button.main.connected">Sensor connected</string>
 
 </resources>

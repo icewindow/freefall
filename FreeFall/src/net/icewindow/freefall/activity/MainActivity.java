@@ -2,16 +2,13 @@ package net.icewindow.freefall.activity;
 
 import net.icewindow.freefall.R;
 import net.icewindow.freefall.service.FreefallService;
-import net.icewindow.freefall.service.bluetooth.BluetoothClient;
-import net.icewindow.freefall.service.bluetooth.ConnectedDevice;
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,18 +17,37 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-	private final static class ConnectHandler extends Handler {
-		private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+	private Button connectBtn;
 
+	private final BroadcastReceiver connectStateReceiver = new BroadcastReceiver() {
 		@Override
-		public void handleMessage(Message msg) {
-			if (msg.what == FreefallService.MSG_BT_CLIENT_READY) {
-				ConnectedDevice server = (ConnectedDevice) msg.obj;
-				server.write(adapter.getAddress());
-				server.disconnect();
+		public void onReceive(Context context, Intent intent) {
+			switch (intent.getIntExtra(FreefallService.BROADCAST_EXTRA_SENSOR_CONNECTION_STATE, FreefallService.STATE_OFFLINE)) {
+				case FreefallService.STATE_CONNECTED:
+					connectBtn.setText(R.string.button_main_connected);
+					connectBtn.setOnClickListener(null);
+					break;
+				case FreefallService.STATE_CONNECTING:
+					connectBtn.setText(R.string.button_main_connecting);
+					connectBtn.setOnClickListener(null);
+					break;
+				default:
+					connectBtn.setText(R.string.button_main_connect);
+					connectBtn.setOnClickListener(connectButtonOnClickListener);
+					break;
 			}
 		}
-	}
+	};
+
+	private final View.OnClickListener connectButtonOnClickListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent service = new Intent(FreefallService.INTENT_NAME);
+			service.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR, FreefallService.ACTION_CONNECT_SENSOR);
+			startService(service);
+			connectBtn.setText(R.string.button_main_connecting);
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,65 +72,11 @@ public class MainActivity extends Activity {
 			startActivity(intent);
 		}
 
-		{
-			Button btn = (Button) findViewById(R.id.btn_main_rtdv);
-			btn.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(MainActivity.this, RealtimeDataActivity.class);
-					startActivity(intent);
-				}
-			});
-		}
-		{
-			Button btn = (Button) findViewById(R.id.btn_clear);
-			btn.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					preferences.edit().clear().commit();
-					finish();
-				}
-			});
-		}
-		{
-			Button btn = (Button) findViewById(R.id.btn_stop_service);
-			btn.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(FreefallService.INTENT_NAME);
-					stopService(intent);
-				}
-			});
-		}
-		{
-			Button btn = (Button) findViewById(R.id.btn_mailtest);
-			btn.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(FreefallService.INTENT_NAME);
-					intent.putExtra(FreefallService.EXTRA_ACTION_DESCRIPTOR, FreefallService.ACTION_SEND_MAIL);
-					intent.putExtra(FreefallService.EXTRA_EMAIL_BODY, "Freefall test mail");
-					intent.putExtra(FreefallService.EXTRA_EMAIL_SUBJECT, "Freefall Test message");
-					startService(intent);
-				}
-			});
-		}
-		{
-			Button btn = (Button) findViewById(R.id.btn_send_ping);
-			btn.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					final Handler handler = new ConnectHandler();
-					BluetoothClient client = new BluetoothClient(handler);
-					try {
-						BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
-								preferences.getString(getString(R.string.SENSOR_ADDRESS), ""));
-						client.connectToServer(device);
-					} catch (IllegalArgumentException e) {
-					}
-				}
-			});
-		}
+		connectBtn = (Button) findViewById(R.id.btn_send_ping);
+		connectBtn.setOnClickListener(connectButtonOnClickListener);
+
+		IntentFilter filter = new IntentFilter(FreefallService.BROADCAST_SENSOR_CONNECTION_STATE);
+		registerReceiver(connectStateReceiver, filter);
 	}
 
 	@Override
@@ -126,9 +88,14 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent;
 		switch (item.getItemId()) {
 			case R.id.action_settings:
-				Intent intent = new Intent(this, SettingsActivity.class);
+				intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
+				break;
+			case R.id.action_start_graph:
+				intent = new Intent(MainActivity.this, RealtimeDataActivity.class);
 				startActivity(intent);
 				break;
 		}
@@ -137,7 +104,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-
 		super.onDestroy();
 	}
 

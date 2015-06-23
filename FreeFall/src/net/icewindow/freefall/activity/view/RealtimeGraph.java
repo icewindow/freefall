@@ -442,8 +442,7 @@ public class RealtimeGraph extends SurfaceView implements SurfaceHolder.Callback
 		// Draw X markers
 		if (model.drawGridX()) {
 			for (int i = 1; i < majorCount + 1; i++) {
-				int line = (int) Math
-						.round(diagramStartX + i * macroUnitWidth - model.getOffsetX() % model.getScaleX());
+				int line = (int) Math.round(diagramStartX + i * macroUnitWidth - model.getOffsetX() % model.getScaleX());
 				r.set(line, diagramStartY, line + 1, diagramEndY);
 				c.drawRect(r, paint);
 			}
@@ -471,8 +470,7 @@ public class RealtimeGraph extends SurfaceView implements SurfaceHolder.Callback
 		if (model.drawNumbersX()) {
 			c.clipRect(r);
 			for (int i = 0; i < majorCount - 1; i++) {
-				c.drawText("" + i,
-						(float) (diagramStartX + i * macroUnitWidth - model.getOffsetX() % model.getScaleX()) + 2.0f,
+				c.drawText("" + i, (float) (diagramStartX + i * macroUnitWidth - model.getOffsetX() % model.getScaleX()) + 2.0f,
 						baseline + diagramStartX + 2, paint);
 			}
 		}
@@ -509,6 +507,10 @@ public class RealtimeGraph extends SurfaceView implements SurfaceHolder.Callback
 
 	public RealtimeGraphModel getModel() {
 		return model;
+	}
+
+	public void setModel(RealtimeGraphModel model) {
+		this.model = model;
 	}
 
 }
