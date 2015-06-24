@@ -33,44 +33,68 @@
             android:key="@string/DISPLAY_NOTIFICATION"
             android:summary="@string/pref.notification.show.ongoing.hint"
             android:title="@string/pref.notification.show.ongoing" />
-    </PreferenceCategory>
 
-    <PreferenceScreen
-        android:summary="@string/pref.mail.title.hint"
-        android:title="@string/pref.mail.title" >
-        <EditTextPreference
-            android:defaultValue="@string/pref.mail.placeholder"
-            android:key="@string/MAIL_ADDRESS_FROM"
-            android:summary="@string/pref.mail.address.from.hint"
-            android:title="@string/pref.mail.address.from" />
-        <EditTextPreference
-            android:defaultValue="@string/pref.mail.placeholder"
-            android:key="@string/MAIL_ADDRESS_TO"
-            android:summary="@string/pref.mail.address.to.hint"
-            android:title="@string/pref.mail.address.to" />
-
-        <PreferenceCategory android:title="@string/pref.mail.login.title" >
-            <CheckBoxPreference
-                android:defaultValue="true"
-                android:disableDependentsState="true"
-                android:key="@string/MAIL_AUTH_SENDERISUSER"
-                android:summary="@string/pref.mail.login.senderIsUser.hint"
-                android:title="@string/pref.mail.login.senderIsUser" />
-
+        <PreferenceScreen
+            android:summary="@string/pref.mail.title.hint"
+            android:title="@string/pref.mail.title" >
             <EditTextPreference
                 android:defaultValue="@string/pref.mail.placeholder"
-                android:dependency="@string/MAIL_AUTH_SENDERISUSER"
-                android:key="@string/MAIL_AUTH_USER"
-                android:title="@string/pref.mail.login.user" />
+                android:key="@string/MAIL_ADDRESS_FROM"
+                android:summary="@string/pref.mail.address.from.hint"
+                android:title="@string/pref.mail.address.from" />
             <EditTextPreference
-                android:inputType="textPassword"
-                android:key="@string/MAIL_AUTH_PASSWORD"
-                android:title="@string/pref.mail.login.pass" />
-        </PreferenceCategory>
-        <PreferenceCategory android:title="@string/pref.mail.server.title" >
-            <EditTextPreference android:title="@string/pref.mail.server.address" android:summary="@string/pref.mail.server.address.hint" android:defaultValue="@string/pref.mail.server.address.default" android:key="@string/MAIL_SERVER_ADDRESS"/>
-            <EditTextPreference android:title="@string/pref.mail.server.port" android:summary="@string/pref.mail.server.port.hint" android:defaultValue="@string/pref.mail.server.port.default" android:key="@string/MAIL_SERVER_PORT"/>
-        </PreferenceCategory>
-    </PreferenceScreen>
+                android:defaultValue="@string/pref.mail.placeholder"
+                android:key="@string/MAIL_ADDRESS_TO"
+                android:summary="@string/pref.mail.address.to.hint"
+                android:title="@string/pref.mail.address.to" />
+
+            <PreferenceCategory android:title="@string/pref.mail.login.title" >
+                <CheckBoxPreference
+                    android:defaultValue="true"
+                    android:disableDependentsState="true"
+                    android:key="@string/MAIL_AUTH_SENDERISUSER"
+                    android:summary="@string/pref.mail.login.senderIsUser.hint"
+                    android:title="@string/pref.mail.login.senderIsUser" />
+
+                <EditTextPreference
+                    android:defaultValue="@string/pref.mail.placeholder"
+                    android:dependency="@string/MAIL_AUTH_SENDERISUSER"
+                    android:key="@string/MAIL_AUTH_USER"
+                    android:title="@string/pref.mail.login.user" />
+                <EditTextPreference
+                    android:inputType="textPassword"
+                    android:key="@string/MAIL_AUTH_PASSWORD"
+                    android:title="@string/pref.mail.login.pass" />
+            </PreferenceCategory>
+            <PreferenceCategory android:title="@string/pref.mail.server.title" >
+                <EditTextPreference
+                    android:defaultValue="@string/pref.mail.server.address.default"
+                    android:key="@string/MAIL_SERVER_ADDRESS"
+                    android:summary="@string/pref.mail.server.address.hint"
+                    android:title="@string/pref.mail.server.address" />
+                <EditTextPreference
+                    android:defaultValue="@string/pref.mail.server.port.default"
+                    android:key="@string/MAIL_SERVER_PORT"
+                    android:summary="@string/pref.mail.server.port.hint"
+                    android:title="@string/pref.mail.server.port" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:summary="@string/pref.location.title.hint"
+            android:title="@string/pref.location.title" android:enabled="false">
+            <PreferenceCategory android:title="@string/pref.location.providers" >
+                <Preference android:title="@string/pref.location.providers.battery" />
+
+                <CheckBoxPreference android:title="@string/pref.location.providers.GPS" />
+                <CheckBoxPreference android:title="@string/pref.location.providers.network" />
+                <CheckBoxPreference android:title="@string/pref.location.providers.network" />
+            </PreferenceCategory>
+            <PreferenceCategory android:title="@string/pref.location.updates.title" >
+                <Preference
+                    android:summary="@string/pref.location.updates.help.more"
+                    android:title="@string/pref.location.updates.help.title" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
 
 </PreferenceScreen>

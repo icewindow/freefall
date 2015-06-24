@@ -32,5 +32,24 @@
     <string name="pref.mail.server.port">Server port</string>
     <string name="pref.mail.server.port.hint">Enter the port your SMTP server uses</string>
     <string name="pref.mail.server.port.default">465</string>
+    <string name="pref.location.title">Location settings</string>
+    <string name="pref.location.title.hint">Adjust how the app determines your location</string>
+    <string name="pref.location.providers">Location providers</string>
+    <string name="pref.location.providers.GPS">GPS</string>
+    <string name="pref.location.providers.network">Cell network</string>
+    <string name="pref.location.providers.wifi">Wifi</string>
+    <string name="pref.location.providers.battery">Chosing more providers enables potentially more accurate location readings, but consumes more battery</string>
+    <string name="pref.location.updates.title">Update frequency</string>
+    <string name="pref.location.updates.help.title">Change how frequently to obtain location updates.</string>
+    <string name="pref.location.updates.help.hint">Tap for more info</string>
+    <string name="pref.location.updates.help.more">Higher values mean more time in between updates and potentially less accurate readings but lower battery usage. Lower values mean more frequent updates and potentially more accurate location readings. However, battery consumption will be higher.</string>
+    <!--
+         <string name="pref.location."></string>
+    <string name="pref.location."></string>
+    <string name="pref.location."></string>
+    <string name="pref.location."></string>
+    <string name="pref.location."></string>
+    <string name="pref.location."></string>
+    -->
 
 </resources>

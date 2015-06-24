@@ -28,6 +28,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -369,6 +371,9 @@ public class FreefallService extends Service {
 	private boolean isAlive;
 
 	private SharedPreferences preferences;
+	
+	private LocationManager locationManager;
+	private Location lastLocation;
 
 	private RealtimeGraphModel model;
 	private int server_state = STATE_OFFLINE;
@@ -429,6 +434,8 @@ public class FreefallService extends Service {
 		}
 		client = new BluetoothClient(serviceHandler);
 
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		
 	}
 
 	@Override
