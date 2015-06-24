@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="pref.bluetooth.title">Verbindungseinstellungen</string>
+    <string name="pref.bluetooth.host">Sensor auswählen</string>
+    <string name="pref.bluetooth.host.hint">Wählen Sie aus welches Gerät als Sensor verwendet werden soll</string>
+    <string name="pref.bluetooth.active">Aktive Verbindung</string>
+    <string name="pref.bluetooth.active.hint.checked">Der Sensor verbindet sich automatisch nach dem einschalten</string>
+    <string name="pref.bluetooth.active.hint.unchecked">Die Verbindung zum Sensor muss manuell aufgebaut werden</string>
+    <string name="pref.notification.title">Benachrichtigungen</string>
+    <string name="pref.notification.show.ongoing">Zeige Benachrichtigung</string>
+    <string name="pref.notification.show.ongoing.hint">Zeige Sysbol in der Benachrichtigungsleiste.</string>
+    <string name="pref.graph.title">Grapheinstellungen</string>
+    <string name="pref.graph.gridX">Soll ein Raster in X Richtung gezeichnet werden?</string>
+    <string name="pref.graph.gridY">Soll ein Raster in Y Richtung gezeichnet werden?</string>
+    <string name="pref.mail.title">Emaileinstellungen</string>
+    <string name="pref.mail.title.hint">Einstellungen für Email-Benachrichtigung</string>
+    <string name="pref.mail.address.from">Absenderadresse</string>
+    <string name="pref.mail.address.from.hint">Von welchem Absender die Emails gesendet werden sollen</string>
+    <string name="pref.mail.address.to">Empfängeradresse</string>
+    <string name="pref.mail.address.to.hint">An welche Adresse sollen die Mails gesendet werden?</string>
+    <string name="pref.mail.login.title">Logindaten</string>
+    <string name="pref.mail.login.senderIsUser">Absenderadresse ist Benutzername</string>
+    <string name="pref.mail.login.senderIsUser.hint">Wählen Sie diese Option ab wenn der Benutzername für den Postausgang nicht der Absenderadrese entspricht</string>
+    <string name="pref.mail.login.user">Postausgang Benutzername</string>
+    <string name="pref.mail.login.pass">Passwort</string>
+    <string name="pref.mail.placeholder">Max.muster@beispiel.de</string>
+    <string name="pref.mail.server.title">Servereinstellungen</string>
+    <string name="pref.mail.server.address">Serveradresse</string>
+    <string name="pref.mail.server.address.hint">Tragen Sie die Adresse ihres SMTP Servers hier ein</string>
+    <string name="pref.mail.server.address.default">smtp.gmail.com</string>
+    <string name="pref.mail.server.port">Serverport</string>
+    <string name="pref.mail.server.port.hint">Tragen Sie den Port auf dem Ihr SMTP Server arbeitet hier ein</string>
+    <string name="pref.mail.server.port.default">465</string>
+    <string name="pref.location.title">Positionseinstellungen</string>
+
+</resources>

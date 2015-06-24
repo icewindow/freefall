@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="notification.service.ticker">FreeFall läuft</string>
+    <string name="notification.service.title">Hilfe, Ich Falle!</string>
+    <string name="notification.service.server.stopped">Server gestoppt. Ist Bluetooth eingeschaltet?</string>
+    <string name="notification.service.sensor.waiting.active">Warte auf Sensor</string>
+    <string name="notification.service.sensor.waiting.passive">Tippen um Verbindung mit Sensor herzustellen</string>
+    <string name="notification.service.sensor.connecting.passive">Verbinde&#8230;</string>
+    <string name="notification.service.sensor.connected">Sensor verbunden</string>
+    <string name="notification.mail.sending">Email wird gesendet&#8230;</string>
+
+</resources>

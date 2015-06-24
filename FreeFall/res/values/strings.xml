@@ -4,7 +4,7 @@
     <string name="app_name">Help me, I\'m falling!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_realtime_data">Realtime data view</string>
-    <string name="title_activity_bluetooth_picker">Pick bluetooth host device</string>
+    <string name="title_activity_bluetooth_picker">Select sensor device</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_first_setup">First-time setup</string>
 

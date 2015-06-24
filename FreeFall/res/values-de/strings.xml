@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Hilfe, Ich Falle!</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="title_activity_realtime_data">Echtzeitdaten</string>
+    <string name="title_activity_bluetooth_picker">Sensor auswählen</string>
+    <string name="title_activity_settings">Einstellungen</string>
+
+</resources>

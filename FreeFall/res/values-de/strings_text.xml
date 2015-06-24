@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="text.connecting">Verbinden&#8230;</string>
+    <string name="text.connecting.failed">Es wurde kein Gerät ausgewählt!\nBitte wählen Sie zuerst ein Gerät aus!</string>
+    <string name="text.connecting.connected">Mit %1$s verbunden</string>
+    <string name="text.connecting.disconnected">Verbindung zu %1$s wurde getrennt</string>
+    <string name="text.discovery.devicecount">%1$d Gerät(e) gefunden</string>
+    <string name="text.bluetooth.noAdapter">Es wurde kein Bluetooth-Adapter gefunden!</string>
+    <string name="text.bluetooth.enableBT">Bitte schalten Sie Bluetooth ein!</string>
+    <string name="text.bluetooth.selectedDevice">%1$s wird verwendet\n(Geräteadresse: %2$s)</string>
+    <string name="text.menu.save">In Datei speichern</string>
+    <string name="text.saving">Daten speichern. Das könnte etwas dauern ;)</string>
+    <string name="text.saved">Daten in \"%1$s\" gespeichert</string>
+    <string name="text.saving.error">Speichern fehlgeschlagen!</string>
+    <string name="text.menu.clear">Daten löschen</string>
+    <string name="text.menu.grid.x">Zeige X Raster</string>
+    <string name="text.menu.grid.y">Zeige Y Raster</string>
+    <string name="text.menu.startGraph">Graph</string>
+
+</resources>

@@ -8,5 +8,6 @@
     <string name="notification.service.sensor.waiting.passive">Tap to attempt to connect sensor</string>
     <string name="notification.service.sensor.connecting.passive">Connecting&#8230;</string>
     <string name="notification.service.sensor.connected">Sensor connected</string>
+    <string name="notification.mail.sending">Sending email&#8230;</string>
 
 </resources>

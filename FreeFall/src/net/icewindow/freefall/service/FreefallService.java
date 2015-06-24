@@ -210,10 +210,12 @@ public class FreefallService extends Service {
 					switch (msg.arg1) {
 						case ARG_BT_DISCONNECT:
 							if (isSensorActive()) {
-								notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+								notificationBuilder
+										.setContentText(getString(R.string.notification_service_sensor_waiting_active));
 								setServerState(STATE_ONLINE);
 							} else {
-								notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
+								notificationBuilder
+										.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
 								setServerState(STATE_OFFLINE);
 							}
 							sensor = null;
@@ -247,8 +249,8 @@ public class FreefallService extends Service {
 							// Fall
 							{
 								StringBuilder builder = new StringBuilder();
-								builder.append("User has fallen!\n\nwww.google.com/maps/place/").append(bestLocation.getLatitude())
-										.append(",").append(bestLocation.getLongitude());
+								builder.append("User has fallen!\n\nwww.google.com/maps/place/")
+										.append(bestLocation.getLatitude()).append(",").append(bestLocation.getLongitude());
 								Intent service = new Intent(INTENT_NAME);
 								service.putExtra(EXTRA_ACTION_DESCRIPTOR, ACTION_SEND_MAIL);
 								service.putExtra(EXTRA_EMAIL_SUBJECT, "Freefall fall event");
@@ -298,6 +300,12 @@ public class FreefallService extends Service {
 					postNotification();
 					break;
 				case MSG_SEND_MAIL:
+					NotificationCompat.Builder sendMailNotification = new NotificationCompat.Builder(FreefallService.this);
+					sendMailNotification.setOngoing(true).setSmallIcon(R.drawable.ic_freefall_service)
+							.setContentText(getString(R.string.notification_mail_sending))
+							.setTicker(getString(R.string.notification_mail_sending))
+							.setContentTitle(getString(R.string.notification_service_title));
+					notificationManager.notify(mailNotificationID, sendMailNotification.build());
 					Intent intent = (Intent) msg.obj;
 					final String username;
 					if (preferences.getBoolean(getString(R.string.MAIL_AUTH_SENDERISUSER), false)) {
@@ -339,6 +347,7 @@ public class FreefallService extends Service {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					notificationManager.cancel(mailNotificationID);
 					break;
 				case MSG_TOAST:
 					Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_SHORT).show();
@@ -412,6 +421,7 @@ public class FreefallService extends Service {
 	private NotificationCompat.Builder notificationBuilder;
 	private NotificationManager notificationManager;
 	private int notificationID = 0x1CEC0DE;
+	private int mailNotificationID = 0x1CEC0DE5;
 	private HandlerThread backgroundThread;
 	private ServiceHandler serviceHandler;
 	private BluetoothAdapter adapter;
@@ -487,7 +497,7 @@ public class FreefallService extends Service {
 		client = new BluetoothClient(serviceHandler);
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		
+
 	}
 
 	@Override
@@ -507,7 +517,8 @@ public class FreefallService extends Service {
 						String address = preferences.getString(getString(R.string.SENSOR_ADDRESS), "");
 						if (address != "") {
 							BluetoothDevice device = adapter.getRemoteDevice(address);
-							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_connecting_passive));
+							notificationBuilder
+									.setContentText(getString(R.string.notification_service_sensor_connecting_passive));
 							postNotification();
 							setServerState(STATE_CONNECTING);
 							client.connectToServer(device);

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="button.connect">Mit Bluetooth verbinden</string>
+    <string name="button.discovery.start">Suche starten</string>
+    <string name="button.discovery.discovering">Suche läuft&#8230;</string>
+    <string name="button.main.connect">Mit Sensor verbinden</string>
+    <string name="button.main.connecting">Verbinden&#8230;</string>
+    <string name="button.main.connected">Sensoer verbunden</string>
+
+</resources>
