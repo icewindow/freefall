@@ -1,10 +1,11 @@
 package net.icewindow.freefall.service.bluetooth;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 import net.icewindow.freefall.service.FreefallService;
 import android.bluetooth.BluetoothDevice;
@@ -60,7 +61,8 @@ public class ConnectedDevice extends Thread {
 	@Override
 	public void run() {
 		running = true;
-		Scanner scanner = new Scanner(in);
+		InputStreamReader streamReader = new InputStreamReader(in);
+		BufferedReader reader = new BufferedReader(streamReader);
 
 		Log.d(TAG, "Listening for incoming data...");
 		{
@@ -70,11 +72,12 @@ public class ConnectedDevice extends Thread {
 		}
 		while (running) {
 			try {
-				String line = scanner.nextLine();
+				String line = reader.readLine();
 				Message message = handler.obtainMessage(FreefallService.MSG_BLUETOOTH_MESSAGE);
-				// message.obj = builder.toString();
 				message.obj = line;
 				handler.sendMessage(message);
+			} catch (IOException e) {
+				break;
 			} catch (NoSuchElementException e) {
 				break;
 			}

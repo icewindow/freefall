@@ -29,8 +29,10 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -180,15 +182,15 @@ public class FreefallService extends Service {
 	 * Server state connected
 	 */
 	public static final int STATE_CONNECTED = 3;
-	
+
 	/**
 	 * Sensor mode. Send events only
 	 */
-	public static final String SENSOR_MODE_EVENTS_ONLY = "1";
+	public static final String SENSOR_MODE_EVENTS_ONLY = "0";
 	/**
 	 * Sensor mode. Send events and raw data
 	 */
-	public static final String SENSOR_MODE_EVENTS_AND_DATA = "2";
+	public static final String SENSOR_MODE_EVENTS_AND_DATA = "1";
 
 	/**
 	 * Handler implementation
@@ -208,15 +210,14 @@ public class FreefallService extends Service {
 					switch (msg.arg1) {
 						case ARG_BT_DISCONNECT:
 							if (isSensorActive()) {
-								notificationBuilder
-										.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+								notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_active));
 								setServerState(STATE_ONLINE);
 							} else {
-								notificationBuilder
-										.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
+								notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
 								setServerState(STATE_OFFLINE);
 							}
 							sensor = null;
+							locationManager.removeUpdates(locationListener);
 							break;
 						case ARG_BT_CONNECT:
 							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_connected));
@@ -226,6 +227,14 @@ public class FreefallService extends Service {
 								sensor = client.getRemoteDevice();
 							}
 							setServerState(STATE_CONNECTED);
+							if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+								locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, locationTimeDelta,
+										locationDistanceDelta, locationListener);
+							}
+							if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+								locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, locationTimeDelta,
+										locationDistanceDelta, locationListener);
+							}
 							break;
 					}
 					postNotification();
@@ -233,12 +242,33 @@ public class FreefallService extends Service {
 				case MSG_BLUETOOTH_MESSAGE:
 					String[] parts = ((String) msg.obj).split(":");
 					if (parts[0].equals("msg")) {
-						Toast.makeText(FreefallService.this, parts[1], Toast.LENGTH_SHORT).show();
+						switch (Integer.parseInt(parts[1])) {
+							case 1:
+							// Fall
+							{
+								StringBuilder builder = new StringBuilder();
+								builder.append("User has fallen!\n\nwww.google.com/maps/place/").append(bestLocation.getLatitude())
+										.append(",").append(bestLocation.getLongitude());
+								Intent service = new Intent(INTENT_NAME);
+								service.putExtra(EXTRA_ACTION_DESCRIPTOR, ACTION_SEND_MAIL);
+								service.putExtra(EXTRA_EMAIL_SUBJECT, "Freefall fall event");
+								service.putExtra(EXTRA_EMAIL_BODY, builder.toString());
+								startService(service);
+							}
+								break;
+							case 2:
+								// Sitting
+								break;
+							case 3:
+								// Make toast
+								Toast.makeText(FreefallService.this, parts[2], Toast.LENGTH_SHORT).show();
+								break;
+						}
 					} else if (parts[0].equals("data")) {
 						if (model != null) {
-
 							try {
-								String[] data = parts[1].split(",");
+								final String partData = parts[1];
+								String[] data = partData.split(",");
 								float vx = Float.parseFloat(data[0]);
 								float vy = Float.parseFloat(data[1]);
 								float vz = Float.parseFloat(data[2]);
@@ -330,6 +360,7 @@ public class FreefallService extends Service {
 
 		public void attachModel(RealtimeGraphModel model) {
 			FreefallService.this.model = model;
+
 			if (sensor != null) {
 				sensor.write(SENSOR_MODE_EVENTS_AND_DATA);
 			}
@@ -359,6 +390,25 @@ public class FreefallService extends Service {
 		}
 	};
 
+	private LocationListener locationListener = new LocationListener() {
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+
+		@Override
+		public void onProviderEnabled(String provider) {
+		}
+
+		@Override
+		public void onProviderDisabled(String provider) {
+		}
+
+		@Override
+		public void onLocationChanged(Location location) {
+			bestLocation = location;
+		}
+	};
+
 	private NotificationCompat.Builder notificationBuilder;
 	private NotificationManager notificationManager;
 	private int notificationID = 0x1CEC0DE;
@@ -371,9 +421,11 @@ public class FreefallService extends Service {
 	private boolean isAlive;
 
 	private SharedPreferences preferences;
-	
+
 	private LocationManager locationManager;
-	private Location lastLocation;
+	private Location bestLocation;
+	private long locationTimeDelta = 0;
+	private long locationDistanceDelta = 0;
 
 	private RealtimeGraphModel model;
 	private int server_state = STATE_OFFLINE;
@@ -455,8 +507,7 @@ public class FreefallService extends Service {
 						String address = preferences.getString(getString(R.string.SENSOR_ADDRESS), "");
 						if (address != "") {
 							BluetoothDevice device = adapter.getRemoteDevice(address);
-							notificationBuilder
-									.setContentText(getString(R.string.notification_service_sensor_connecting_passive));
+							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_connecting_passive));
 							postNotification();
 							setServerState(STATE_CONNECTING);
 							client.connectToServer(device);
@@ -468,6 +519,11 @@ public class FreefallService extends Service {
 						notificationBuilder.setContentIntent(pendingIntent);
 						if (sensorActive) {
 							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_active));
+							server = new BluetoothServer(adapter, serviceHandler);
+							if (adapter.isEnabled()) {
+								server.startup();
+								server.start();
+							}
 						} else {
 							notificationBuilder.setContentText(getString(R.string.notification_service_sensor_waiting_passive));
 						}
@@ -496,7 +552,9 @@ public class FreefallService extends Service {
 		super.onDestroy();
 		isAlive = false;
 		unregisterReceiver(bluetoothStateChangeReceiver);
-		server.shutdown();
+		if (server != null) {
+			server.shutdown();
+		}
 		notificationManager.cancel(notificationID);
 		Log.d(TAG, "Service destroyed");
 	}
